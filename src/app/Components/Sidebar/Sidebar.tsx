@@ -19,7 +19,7 @@ export default function Sidebar() {
         { icon: Lock, label: "Settings", active: false },
     ];
     return (
-        <div className="w-[336px] bg-gray-800 h-screen text-white py-14 px-10">
+        <div className="w-[336px] bg-[#0D314B] h-screen text-white py-14 px-10">
             <div>
                 <Image
                     src={logo}
