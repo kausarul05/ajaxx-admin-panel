@@ -7,22 +7,29 @@ import {
     LogOut
 } from "lucide-react";
 import React from 'react'
+import logo from "@/../public/images/logo.png"
+import Image from "next/image";
 
 export default function Sidebar() {
     const menuItems = [
         { icon: LayoutDashboard, label: "Dashboards", active: true },
-        { icon: History, label: "History", active: false },
-        { icon: Star, label: "Review", active: false },
-        { icon: User, label: "Edit Profile", active: false },
-        { icon: Lock, label: "Change Password", active: false },
+        { icon: History, label: "User Management", active: false },
+        { icon: Star, label: "Subscriptions Management", active: false },
+        { icon: User, label: "Review Management", active: false },
+        { icon: Lock, label: "Settings", active: false },
     ];
     return (
-        <div className="w-[336px] bg-gray-800 text-white py-14 px-10">
-            {/* <h2 className="text-xl font-bold mb-8 flex items-center gap-2">
-                <LayoutDashboard className="text-blue-400" />
-                Dashboard
-            </h2> */}
-            <ul className="space-y-1">
+        <div className="w-[336px] bg-gray-800 h-screen text-white py-14 px-10">
+            <div>
+                <Image
+                    src={logo}
+                    alt="Logo"
+                    width={1200}
+                    height={600}
+                    className="w-full object-contain"
+                />
+            </div>
+            <ul className="space-y-1 mt-10">
                 {menuItems.map((item, index) => {   
                     const Icon = item.icon;
                     return (
