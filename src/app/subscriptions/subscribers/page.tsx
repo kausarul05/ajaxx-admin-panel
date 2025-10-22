@@ -276,7 +276,7 @@ export default function Subscribers() {
     // Reset to first page when filters change
     React.useEffect(() => {
         setCurrentPage(1);
-    }, [searchTerm, filterSubscription]);
+    }, [searchTerm, filterSubscription, users]);
 
     // Handle page change
     const handlePageChange = (page: number) => {
@@ -291,7 +291,7 @@ export default function Subscribers() {
         const maxVisiblePages = 5;
 
         let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+        const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
 
         // Adjust if we're at the end
         if (endPage - startPage + 1 < maxVisiblePages) {
@@ -315,7 +315,7 @@ export default function Subscribers() {
         // Add your remove logic here
     };
 
-    const subscriptionTypes = ['all', 'Basic Protection', 'Silver Protection', 'Gold Protection'];
+    // const subscriptionTypes = ['all', 'Basic Protection', 'Silver Protection', 'Gold Protection'];
 
     return (
         <div className="min-h-screen  p-6">

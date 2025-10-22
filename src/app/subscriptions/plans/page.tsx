@@ -93,6 +93,7 @@ export default function PlansManagement() {
 
     const handleEdit = (planName: string) => {
         // setSelectedPlan(planName);
+        console.log(planName)
         setShowEditModal(true);
     };
 
@@ -133,9 +134,9 @@ export default function PlansManagement() {
                                 {plan.features.map((feature, idx) => (
                                     <li key={idx} className="flex items-center gap-2">
                                         {feature.available ? (
-                                            <CircleCheck size={14} className="text-[#007ED6] flex-shrink-0" />
+                                            <CircleCheck size={14} className="text-[#007ED6]" />
                                         ) : (
-                                            <CircleX size={14} className="text-[#EB4335] flex-shrink-0" />
+                                            <CircleX size={14} className="text-[#EB4335]" />
                                         )}
 
                                         {feature?.text}

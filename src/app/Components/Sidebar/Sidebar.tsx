@@ -43,7 +43,7 @@ export default function Sidebar() {
         if (subscriptionsItem?.nestedItems?.some(nested => pathname === nested.href)) {
             setIsSubscriptionsOpen(true);
         }
-    }, [pathname]);
+    }, [pathname, menuItems]);
 
     const handleMouseEnter = () => {
         if (hoverTimeout) {
