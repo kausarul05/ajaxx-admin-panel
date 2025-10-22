@@ -1,13 +1,14 @@
 'use client'
 
+import { Users } from 'lucide-react';
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function Dashboard() {
   const stats = [
-    { title: 'Total User', value: '25,648' },
-    { title: 'Subscribers', value: '58,320' },
-    { title: 'Total Earning', value: '$52,567.53' },
+    { title: 'Total User', value: '25,648', icon: <Users size={24} color='#0ABF9D' className='font-bold'/> },
+    { title: 'Subscribers', value: '58,320', icon: <Users size={24} color='#0ABF9D' className='font-bold'/> },
+    { title: 'Total Earning', value: '$52,567.53', icon: <Users size={24} color='#0ABF9D' className='font-bold'/> },
   ];
 
   const users = [
@@ -74,17 +75,18 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-[#0A2131] p-6">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-      </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         {stats.map((stat, index) => (
           <div key={index} className="bg-[#0D314B] rounded-lg shadow-sm p-6">
-            <h3 className="text-sm font-medium text-white mb-2">{stat.title}</h3>
-            <p className="text-2xl font-bold text-white">{stat.value}</p>
+            <div className='flex  justify-between items-center p-10 px-18'>
+              <div>
+                <h3 className="text-sm font-semibold text-white mb-2">{stat.title}</h3>
+                <p className="text-2xl font-bold text-white">{stat.value}</p>
+              </div>
+              <div className='bg-[#0ABF9D33] p-2 rounded-lg'>{stat.icon}</div>
+            </div>
           </div>
         ))}
       </div>
@@ -110,22 +112,22 @@ export default function Dashboard() {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis 
-                  dataKey="month" 
+                <XAxis
+                  dataKey="month"
                   axisLine={false}
                   tickLine={false}
                   tick={{ fill: '#fff', fontSize: 12 }}
                 />
-                <YAxis 
+                <YAxis
                   axisLine={false}
                   tickLine={false}
                   tick={{ fill: '#fff', fontSize: 12 }}
                   tickFormatter={(value) => `${value / 1000}k`}
                 />
                 <Tooltip content={<CustomTooltip />} />
-                <Bar 
-                  dataKey="revenue" 
-                  fill="#3b82f6" 
+                <Bar
+                  dataKey="revenue"
+                  fill="#3b82f6"
                   radius={[4, 4, 0, 0]}
                   name="Revenue"
                 />
@@ -137,7 +139,7 @@ export default function Dashboard() {
         {/* User Section */}
         <div className="bg-[#0D314B] rounded-lg shadow-sm p-6 mt-10">
           <h2 className="text-lg font-semibold text-white mb-6">User</h2>
-          
+
           {/* Table */}
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -159,13 +161,12 @@ export default function Dashboard() {
                     <td className="py-4 text-sm text-white">{user.email}</td>
                     <td className="py-4 text-sm text-white">{user.registrationDate}</td>
                     <td className="py-4 text-sm">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        user.subscription === 'Gold Protection' 
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : user.subscription === 'Silver Protection'
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${user.subscription === 'Gold Protection'
+                        ? 'bg-yellow-100 text-yellow-800'
+                        : user.subscription === 'Silver Protection'
                           ? 'bg-gray-100 text-gray-800'
                           : 'bg-blue-100 text-blue-800'
-                      }`}>
+                        }`}>
                         {user.subscription}
                       </span>
                     </td>

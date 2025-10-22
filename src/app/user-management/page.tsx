@@ -1,5 +1,6 @@
 'use client'
 
+import { Search } from 'lucide-react';
 import React, { useState, useMemo } from 'react';
 
 export default function UserManagement() {
@@ -285,175 +286,153 @@ export default function UserManagement() {
     const subscriptionTypes = ['all', 'Basic Protection', 'Silver Protection', 'Gold Protection'];
 
     return (
-        <div className="min-h-screen bg-[#0A2131] p-6">
-            {/* Header */}
-            <div className="mb-6">
-                <h1 className="text-2xl font-bold text-white">User Management</h1>
-            </div>
-
-            {/* Search and Filters */}
-            <div className="mb-6 p-4 rounded-lg shadow-sm">
-                <div className="flex flex-col sm:flex-row gap-4">
-                    {/* Search Input */}
-                    <div className="flex-1">
+        <div className="min-h-screen  p-6">
+            <div className='bg-[#0D314B] rounded-lg'>
+                {/* Header */}
+                <div className="flex justify-between items-center p-6">
+                    <h1 className="text-[20px] font-semibold text-[#F9FAFB]">User Management</h1>
+                    <div className='relative'>
                         <input
                             type="text"
-                            placeholder="Search by name or email..."
+                            placeholder="Search"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full px-4 py-2 border border-[#007ED6] rounded-lg focus:ring-2 focus:ring-[#007ED6] focus:border-[#007ED6]"
                         />
-                    </div>
-
-                    {/* Subscription Filter */}
-                    <div className="sm:w-64">
-                        <select
-                            value={filterSubscription}
-                            onChange={(e) => setFilterSubscription(e.target.value)}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        >
-                            {subscriptionTypes.map(type => (
-                                <option key={type} value={type}>
-                                    {type === 'all' ? 'All Subscriptions' : type}
-                                </option>
-                            ))}
-                        </select>
+                        <Search size={18} className='absolute right-4 top-3 cursor-pointer' />
                     </div>
                 </div>
-            </div>
 
-            {/* Table Container */}
-            <div className="rounded-lg shadow-sm border border-[#007ED6] overflow-hidden">
-                {/* Table */}
-                <div className="overflow-x-auto">
-                    <table className="w-full">
-                        <thead className="border-b border-[#007ED6]">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                                    NO
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                                    Name
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                                    Email
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                                    Registration Date
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                                    Subscriptions
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                                    Action
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody className="">
-                            {currentUsers.map((user) => (
-                                <tr key={user.id} className="">
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
-                                        {user.id}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
-                                        {user.name}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
-                                        {user.email}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
-                                        {user.registrationDate}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <span
-                                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${user.subscription === 'Gold Protection'
-                                                ? 'bg-yellow-100 text-yellow-800'
-                                                : user.subscription === 'Silver Protection'
-                                                    ? 'bg-gray-100 text-gray-800'
-                                                    : 'bg-blue-100 text-blue-800'
-                                                }`}
-                                        >
-                                            {user.subscription}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <div className="flex space-x-3">
-                                            <button
-                                                onClick={() => handleBlock(user.id)}
-                                                className="text-orange-600 hover:text-orange-900 font-medium transition-colors"
-                                            >
-                                                Block
-                                            </button>
-                                            <button
-                                                onClick={() => handleRemove(user.id)}
-                                                className="text-red-600 hover:text-red-900 font-medium transition-colors"
-                                            >
-                                                Remove
-                                            </button>
-                                        </div>
-                                    </td>
+
+
+                {/* Table Container */}
+                <div className="rounded-lg shadow-sm border border-[#007ED6] overflow-hidden">
+                    {/* Table */}
+                    <div className="overflow-x-auto">
+                        <table className="w-full">
+                            <thead className="border-b border-[#007ED6]">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                                        NO
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                                        Name
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                                        Email
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                                        Registration Date
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                                        Subscriptions
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                                        Action
+                                    </th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                            </thead>
+                            <tbody className="">
+                                {currentUsers.map((user) => (
+                                    <tr key={user.id} className="">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                                            {user.id}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
+                                            {user.name}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[#F9FAFB]">
+                                            {user.email}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                                            {user.registrationDate}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span
+                                                className={`inline-flex px-2 py-1 text-xs font-semibold text-[#F9FAFB] `}
+                                            >
+                                                {user.subscription}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            <div className="flex space-x-3">
+                                                <button
+                                                    onClick={() => handleBlock(user.id)}
+                                                    className="bg-[#0ABF9D4D] px-4 py-1 text-[#0ABF9D] rounded cursor-pointer font-medium transition-colors"
+                                                >
+                                                    Block
+                                                </button>
+                                                <button
+                                                    onClick={() => handleRemove(user.id)}
+                                                    className="bg-[#551214] px-4 py-1 text-[#FE4D4F] rounded cursor-pointer font-medium transition-colors"
+                                                >
+                                                    Remove
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
 
-                {/* Pagination */}
-                <div className="px-6 py-4 border-t border-[#007ED6]">
-                    <div className="flex flex-col sm:flex-row items-center justify-between space-y-3 sm:space-y-0">
-                        {/* Showing results text */}
-                        <div className="text-sm text-white">
-                            Showing{' '}
-                            <span className="font-medium">
-                                {totalItems === 0 ? 0 : startIndex + 1}
-                            </span>{' '}
-                            to{' '}
-                            <span className="font-medium">
-                                {Math.min(endIndex, totalItems)}
-                            </span>{' '}
-                            of{' '}
-                            <span className="font-medium">{totalItems}</span> results
-                        </div>
+                    {/* Pagination */}
+                    <div className="px-6 py-4 border-t border-[#007ED6]">
+                        <div className="flex flex-col sm:flex-row items-center justify-between space-y-3 sm:space-y-0">
+                            {/* Showing results text */}
+                            <div className="text-sm text-white">
+                                Showing{' '}
+                                <span className="font-medium">
+                                    {totalItems === 0 ? 0 : startIndex + 1}
+                                </span>{' '}
+                                to{' '}
+                                <span className="font-medium">
+                                    {Math.min(endIndex, totalItems)}
+                                </span>{' '}
+                                of{' '}
+                                <span className="font-medium">{totalItems}</span> results
+                            </div>
 
-                        {/* Pagination Controls */}
-                        <div className="flex items-center space-x-1">
-                            {/* Previous Button */}
-                            <button
-                                onClick={() => handlePageChange(currentPage - 1)}
-                                disabled={currentPage === 1}
-                                className={`px-3 py-1 text-sm rounded transition-colors ${currentPage === 1
-                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                    }`}
-                            >
-                                Previous
-                            </button>
-
-                            {/* Page Numbers */}
-                            {getPageNumbers().map((page) => (
+                            {/* Pagination Controls */}
+                            <div className="flex items-center space-x-1">
+                                {/* Previous Button */}
                                 <button
-                                    key={page}
-                                    onClick={() => handlePageChange(page)}
-                                    className={`px-3 py-1 text-sm rounded transition-colors ${currentPage === page
-                                        ? 'bg-blue-600 text-white hover:bg-blue-700'
+                                    onClick={() => handlePageChange(currentPage - 1)}
+                                    disabled={currentPage === 1}
+                                    className={`px-3 py-1 text-sm rounded transition-colors ${currentPage === 1
+                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                         : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                         }`}
                                 >
-                                    {page}
+                                    Previous
                                 </button>
-                            ))}
 
-                            {/* Next Button */}
-                            <button
-                                onClick={() => handlePageChange(currentPage + 1)}
-                                disabled={currentPage === totalPages || totalPages === 0}
-                                className={`px-3 py-1 text-sm rounded transition-colors ${currentPage === totalPages || totalPages === 0
-                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                    }`}
-                            >
-                                Next
-                            </button>
+                                {/* Page Numbers */}
+                                {getPageNumbers().map((page) => (
+                                    <button
+                                        key={page}
+                                        onClick={() => handlePageChange(page)}
+                                        className={`px-3 py-1 text-sm rounded transition-colors ${currentPage === page
+                                            ? 'bg-blue-600 text-white hover:bg-blue-700'
+                                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                            }`}
+                                    >
+                                        {page}
+                                    </button>
+                                ))}
+
+                                {/* Next Button */}
+                                <button
+                                    onClick={() => handlePageChange(currentPage + 1)}
+                                    disabled={currentPage === totalPages || totalPages === 0}
+                                    className={`px-3 py-1 text-sm rounded transition-colors ${currentPage === totalPages || totalPages === 0
+                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                        }`}
+                                >
+                                    Next
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

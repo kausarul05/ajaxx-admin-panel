@@ -66,14 +66,14 @@ export default function Sidebar() {
     };
 
     return (
-        <div className="w-[385px] bg-[#0D314B] h-screen text-white py-14 pt-4 px-10">
+        <div className="w-[385px] bg-[#0D314B] h-screen text-white py-14 pt-4 px-10 fixed z-50">
             <div>
                 <Image
                     src={logo}
                     alt="Logo"
                     width={800}
                     height={600}
-                    className="w-full object-fill"
+                    className="w-[230px] object-fill mx-auto"
                 />
             </div>
             <ul className="space-y-1 mt-10">
