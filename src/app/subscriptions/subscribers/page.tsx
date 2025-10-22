@@ -1,6 +1,9 @@
 'use client'
 
+import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import Image from 'next/image';
 import React, { useState, useMemo } from 'react';
+import userImage from "@/../public/images/profile.jpg"
 
 export default function Subscribers() {
     const [currentPage, setCurrentPage] = useState(1);
@@ -15,6 +18,7 @@ export default function Subscribers() {
             email: 'demo59@gmail.com',
             registrationDate: 'January 20, 2025',
             subscription: 'Basic Protection',
+            image: userImage
         },
         {
             id: 2,
@@ -22,6 +26,7 @@ export default function Subscribers() {
             email: 'demo59@gmail.com',
             registrationDate: 'February 15, 2025',
             subscription: 'Silver Protection',
+            image: userImage
         },
         {
             id: 3,
@@ -29,6 +34,7 @@ export default function Subscribers() {
             email: 'demo59@gmail.com',
             registrationDate: 'March 10, 2025',
             subscription: 'Gold Protection',
+            image: userImage
         },
         {
             id: 4,
@@ -36,6 +42,7 @@ export default function Subscribers() {
             email: 'demo59@gmail.com',
             registrationDate: 'April 09, 2025',
             subscription: 'Basic Protection',
+            image: userImage
         },
         {
             id: 5,
@@ -43,6 +50,7 @@ export default function Subscribers() {
             email: 'demo59@gmail.com',
             registrationDate: 'May 12, 2025',
             subscription: 'Silver Protection',
+            image: userImage
         },
         {
             id: 6,
@@ -50,6 +58,7 @@ export default function Subscribers() {
             email: 'demo59@gmail.com',
             registrationDate: 'June 12, 2025',
             subscription: 'Gold Protection',
+            image: userImage
         },
         {
             id: 7,
@@ -57,6 +66,7 @@ export default function Subscribers() {
             email: 'demo59@gmail.com',
             registrationDate: 'April 12, 2025',
             subscription: 'Basic Protection',
+            image: userImage
         },
         {
             id: 8,
@@ -64,6 +74,7 @@ export default function Subscribers() {
             email: 'demo59@gmail.com',
             registrationDate: 'April 12, 2025',
             subscription: 'Silver Protection',
+            image: userImage
         },
         {
             id: 9,
@@ -71,6 +82,7 @@ export default function Subscribers() {
             email: 'demo59@gmail.com',
             registrationDate: 'April 12, 2025',
             subscription: 'Gold Protection',
+            image: userImage
         },
         {
             id: 10,
@@ -78,6 +90,7 @@ export default function Subscribers() {
             email: 'demo59@gmail.com',
             registrationDate: 'April 12, 2025',
             subscription: 'Silver Protection',
+            image: userImage
         },
         {
             id: 11,
@@ -85,6 +98,7 @@ export default function Subscribers() {
             email: 'demo59@gmail.com',
             registrationDate: 'April 12, 2025',
             subscription: 'Basic Protection',
+            image: userImage
         },
         {
             id: 12,
@@ -92,6 +106,7 @@ export default function Subscribers() {
             email: 'demo59@gmail.com',
             registrationDate: 'June 22, 2025',
             subscription: 'Gold Protection',
+            image: userImage
         },
         {
             id: 13,
@@ -99,6 +114,7 @@ export default function Subscribers() {
             email: 'demo59@gmail.com',
             registrationDate: 'July 04, 2025',
             subscription: 'Silver Protection',
+            image: userImage
         },
         {
             id: 14,
@@ -106,6 +122,7 @@ export default function Subscribers() {
             email: 'demo59@gmail.com',
             registrationDate: 'July 20, 2025',
             subscription: 'Basic Protection',
+            image: userImage
         },
         {
             id: 15,
@@ -113,6 +130,7 @@ export default function Subscribers() {
             email: 'demo59@gmail.com',
             registrationDate: 'August 01, 2025',
             subscription: 'Gold Protection',
+            image: userImage
         },
         {
             id: 16,
@@ -120,6 +138,7 @@ export default function Subscribers() {
             email: 'demo59@gmail.com',
             registrationDate: 'August 11, 2025',
             subscription: 'Silver Protection',
+            image: userImage
         },
         {
             id: 17,
@@ -127,6 +146,7 @@ export default function Subscribers() {
             email: 'demo59@gmail.com',
             registrationDate: 'August 22, 2025',
             subscription: 'Basic Protection',
+            image: userImage
         },
         {
             id: 18,
@@ -134,6 +154,7 @@ export default function Subscribers() {
             email: 'demo59@gmail.com',
             registrationDate: 'September 03, 2025',
             subscription: 'Gold Protection',
+            image: userImage
         },
         {
             id: 19,
@@ -141,6 +162,7 @@ export default function Subscribers() {
             email: 'demo59@gmail.com',
             registrationDate: 'September 10, 2025',
             subscription: 'Silver Protection',
+            image: userImage
         },
         {
             id: 20,
@@ -148,6 +170,7 @@ export default function Subscribers() {
             email: 'demo59@gmail.com',
             registrationDate: 'September 22, 2025',
             subscription: 'Basic Protection',
+            image: userImage
         },
         {
             id: 21,
@@ -155,6 +178,7 @@ export default function Subscribers() {
             email: 'demo59@gmail.com',
             registrationDate: 'October 01, 2025',
             subscription: 'Gold Protection',
+            image: userImage
         },
         {
             id: 22,
@@ -162,6 +186,7 @@ export default function Subscribers() {
             email: 'demo59@gmail.com',
             registrationDate: 'October 10, 2025',
             subscription: 'Silver Protection',
+            image: userImage
         },
         {
             id: 23,
@@ -169,6 +194,7 @@ export default function Subscribers() {
             email: 'demo59@gmail.com',
             registrationDate: 'October 18, 2025',
             subscription: 'Basic Protection',
+            image: userImage
         },
         {
             id: 24,
@@ -176,6 +202,7 @@ export default function Subscribers() {
             email: 'demo59@gmail.com',
             registrationDate: 'October 25, 2025',
             subscription: 'Gold Protection',
+            image: userImage
         },
         {
             id: 25,
@@ -183,6 +210,7 @@ export default function Subscribers() {
             email: 'demo59@gmail.com',
             registrationDate: 'November 03, 2025',
             subscription: 'Silver Protection',
+            image: userImage
         },
         {
             id: 26,
@@ -190,6 +218,7 @@ export default function Subscribers() {
             email: 'demo59@gmail.com',
             registrationDate: 'November 10, 2025',
             subscription: 'Basic Protection',
+            image: userImage
         },
         {
             id: 27,
@@ -197,6 +226,7 @@ export default function Subscribers() {
             email: 'demo59@gmail.com',
             registrationDate: 'November 20, 2025',
             subscription: 'Gold Protection',
+            image: userImage
         },
         {
             id: 28,
@@ -204,6 +234,7 @@ export default function Subscribers() {
             email: 'demo59@gmail.com',
             registrationDate: 'December 02, 2025',
             subscription: 'Silver Protection',
+            image: userImage
         },
         {
             id: 29,
@@ -211,6 +242,7 @@ export default function Subscribers() {
             email: 'demo59@gmail.com',
             registrationDate: 'December 10, 2025',
             subscription: 'Basic Protection',
+            image: userImage
         },
         {
             id: 30,
@@ -218,6 +250,7 @@ export default function Subscribers() {
             email: 'demo59@gmail.com',
             registrationDate: 'December 20, 2025',
             subscription: 'Gold Protection',
+            image: userImage
         }
     ];
     ;
@@ -285,175 +318,162 @@ export default function Subscribers() {
     const subscriptionTypes = ['all', 'Basic Protection', 'Silver Protection', 'Gold Protection'];
 
     return (
-        <div className="min-h-screen bg-[#0A2131] p-6">
-            {/* Header */}
-            <div className="mb-6">
-                <h1 className="text-2xl font-bold text-white">User Management</h1>
-            </div>
-
-            {/* Search and Filters */}
-            <div className="mb-6 p-4 rounded-lg shadow-sm">
-                <div className="flex flex-col sm:flex-row gap-4">
-                    {/* Search Input */}
-                    <div className="flex-1">
+        <div className="min-h-screen  p-6">
+            <div className='bg-[#0D314B] rounded-lg'>
+                {/* Header */}
+                <div className="flex justify-between items-center p-6">
+                    <h1 className="text-[20px] font-semibold text-[#F9FAFB]">Subscribers</h1>
+                    <div className='relative'>
                         <input
                             type="text"
-                            placeholder="Search by name or email..."
+                            placeholder="Search"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full px-4 py-2 border border-[#007ED6] rounded-lg focus:ring-2 focus:ring-[#007ED6] focus:border-[#007ED6]"
                         />
-                    </div>
-
-                    {/* Subscription Filter */}
-                    <div className="sm:w-64">
-                        <select
-                            value={filterSubscription}
-                            onChange={(e) => setFilterSubscription(e.target.value)}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        >
-                            {subscriptionTypes.map(type => (
-                                <option key={type} value={type}>
-                                    {type === 'all' ? 'All Subscriptions' : type}
-                                </option>
-                            ))}
-                        </select>
+                        <Search size={18} className='absolute right-4 top-3 cursor-pointer' />
                     </div>
                 </div>
-            </div>
 
-            {/* Table Container */}
-            <div className="rounded-lg shadow-sm border border-[#007ED6] overflow-hidden">
-                {/* Table */}
-                <div className="overflow-x-auto">
-                    <table className="w-full">
-                        <thead className="border-b border-[#007ED6]">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                                    NO
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                                    Name
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                                    Email
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                                    Registration Date
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                                    Subscriptions
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                                    Action
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody className="">
-                            {currentUsers.map((user) => (
-                                <tr key={user.id} className="">
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
-                                        {user.id}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
-                                        {user.name}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
-                                        {user.email}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
-                                        {user.registrationDate}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <span
-                                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${user.subscription === 'Gold Protection'
-                                                ? 'bg-yellow-100 text-yellow-800'
-                                                : user.subscription === 'Silver Protection'
-                                                    ? 'bg-gray-100 text-gray-800'
-                                                    : 'bg-blue-100 text-blue-800'
-                                                }`}
-                                        >
-                                            {user.subscription}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <div className="flex space-x-3">
-                                            <button
-                                                onClick={() => handleBlock(user.id)}
-                                                className="text-orange-600 hover:text-orange-900 font-medium transition-colors"
-                                            >
-                                                Block
-                                            </button>
-                                            <button
-                                                onClick={() => handleRemove(user.id)}
-                                                className="text-red-600 hover:text-red-900 font-medium transition-colors"
-                                            >
-                                                Remove
-                                            </button>
-                                        </div>
-                                    </td>
+
+
+                {/* Table Container */}
+                <div className="rounded-lg shadow-sm border border-[#007ED6] overflow-hidden">
+                    {/* Table */}
+                    <div className="overflow-x-auto">
+                        <table className="w-full">
+                            <thead className="border-b border-[#007ED6]">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                                        NO
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                                        Name
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                                        Email
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                                        Registration Date
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                                        Subscriptions
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                                        Action
+                                    </th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                            </thead>
+                            <tbody className="">
+                                {currentUsers.map((user) => (
+                                    <tr key={user.id} className="">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                                            {user.id}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
+                                            <div className='flex items-center gap-3'>
+                                                <Image
+                                                    src={user?.image}
+                                                    alt={user?.name}
+                                                    width={120}
+                                                    height={60}
+                                                    className='w-10 h-10 object-fill rounded'
+                                                />
+                                                {user.name}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[#F9FAFB]">
+                                            {user.email}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                                            {user.registrationDate}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span
+                                                className={`inline-flex px-2 py-1 text-xs font-semibold text-[#F9FAFB] `}
+                                            >
+                                                {user.subscription}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            <div className="flex space-x-3">
+                                                <button
+                                                    onClick={() => handleBlock(user.id)}
+                                                    className="bg-[#0ABF9D4D] px-4 py-1 text-[#0ABF9D] rounded cursor-pointer font-medium transition-colors"
+                                                >
+                                                    Block
+                                                </button>
+                                                <button
+                                                    onClick={() => handleRemove(user.id)}
+                                                    className="bg-[#551214] px-4 py-1 text-[#FE4D4F] rounded cursor-pointer font-medium transition-colors"
+                                                >
+                                                    Remove
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
 
-                {/* Pagination */}
-                <div className="px-6 py-4 border-t border-[#007ED6]">
-                    <div className="flex flex-col sm:flex-row items-center justify-between space-y-3 sm:space-y-0">
-                        {/* Showing results text */}
-                        <div className="text-sm text-white">
-                            Showing{' '}
-                            <span className="font-medium">
-                                {totalItems === 0 ? 0 : startIndex + 1}
-                            </span>{' '}
-                            to{' '}
-                            <span className="font-medium">
-                                {Math.min(endIndex, totalItems)}
-                            </span>{' '}
-                            of{' '}
-                            <span className="font-medium">{totalItems}</span> results
-                        </div>
+                    {/* Pagination */}
+                    <div className="px-6 py-4 border-t border-[#007ED6]">
+                        <div className="flex flex-col sm:flex-row items-center justify-between space-y-3 sm:space-y-0">
+                            {/* Showing results text */}
+                            <div className="text-sm text-white">
+                                Showing{' '}
+                                <span className="font-medium">
+                                    {totalItems === 0 ? 0 : startIndex + 1}
+                                </span>{' '}
+                                to{' '}
+                                <span className="font-medium">
+                                    {Math.min(endIndex, totalItems)}
+                                </span>{' '}
+                                of{' '}
+                                <span className="font-medium">{totalItems}</span> results
+                            </div>
 
-                        {/* Pagination Controls */}
-                        <div className="flex items-center space-x-1">
-                            {/* Previous Button */}
-                            <button
-                                onClick={() => handlePageChange(currentPage - 1)}
-                                disabled={currentPage === 1}
-                                className={`px-3 py-1 text-sm rounded transition-colors ${currentPage === 1
-                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                    }`}
-                            >
-                                Previous
-                            </button>
-
-                            {/* Page Numbers */}
-                            {getPageNumbers().map((page) => (
+                            {/* Pagination Controls */}
+                            <div className="flex items-center space-x-3">
+                                {/* Previous Button */}
                                 <button
-                                    key={page}
-                                    onClick={() => handlePageChange(page)}
-                                    className={`px-3 py-1 text-sm rounded transition-colors ${currentPage === page
-                                        ? 'bg-blue-600 text-white hover:bg-blue-700'
+                                    onClick={() => handlePageChange(currentPage - 1)}
+                                    disabled={currentPage === 1}
+                                    className={`w-10 h-10 font-bold text-sm rounded transition-colors cursor-pointer ${currentPage === 1
+                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                         : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                         }`}
                                 >
-                                    {page}
+                                    <ChevronLeft size={24} color='black' className='font-bold mx-auto' />
                                 </button>
-                            ))}
 
-                            {/* Next Button */}
-                            <button
-                                onClick={() => handlePageChange(currentPage + 1)}
-                                disabled={currentPage === totalPages || totalPages === 0}
-                                className={`px-3 py-1 text-sm rounded transition-colors ${currentPage === totalPages || totalPages === 0
-                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                    }`}
-                            >
-                                Next
-                            </button>
+                                {/* Page Numbers */}
+                                {getPageNumbers().map((page) => (
+                                    <button
+                                        key={page}
+                                        onClick={() => handlePageChange(page)}
+                                        className={`w-10 h-10 font-bold text-sm rounded transition-colors cursor-pointer ${currentPage === page
+                                            ? 'bg-[#245FE7] text-white'
+                                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                            }`}
+                                    >
+                                        {page}
+                                    </button>
+                                ))}
+
+                                {/* Next Button */}
+                                <button
+                                    onClick={() => handlePageChange(currentPage + 1)}
+                                    disabled={currentPage === totalPages || totalPages === 0}
+                                    className={`w-10 h-10 font-bold cursor-pointer text-sm rounded transition-colors ${currentPage === totalPages || totalPages === 0
+                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                        }`}
+                                >
+                                    <ChevronRight size={24} color='black' className='font-bold mx-auto' />
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
