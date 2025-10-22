@@ -66,14 +66,14 @@ export default function Sidebar() {
     };
 
     return (
-        <div className="w-[336px] bg-[#0D314B] h-screen text-white py-14 px-10">
+        <div className="w-[385px] bg-[#0D314B] h-screen text-white py-14 pt-4 px-10">
             <div>
                 <Image
                     src={logo}
                     alt="Logo"
-                    width={1200}
+                    width={800}
                     height={600}
-                    className="w-full object-contain"
+                    className="w-full object-fill"
                 />
             </div>
             <ul className="space-y-1 mt-10">
@@ -155,11 +155,6 @@ export default function Sidebar() {
                         </li>
                     );
                 })}
-                
-                <li className="flex items-center gap-3 hover:bg-red-600 p-3 rounded cursor-pointer transition-colors mt-8">
-                    <LogOut size={20} />
-                    Logout
-                </li>
             </ul>
         </div>
     )
