@@ -37,7 +37,7 @@ export default function RootLayout({
                     </div>
                     <div className="w-full pl-[385px] bg-[#0A2131]">
                         <div className="flex justify-between bg-[#0D314B] p-6">
-                            <h2 className="font-semibold text-[20px] flex items-center gap-3 cursor-pointer"><ChevronsLeft size={28} className="font-bold"/> Overview</h2>
+                            <h2 className="font-semibold text-[20px] flex items-center gap-3 cursor-pointer text-white"><ChevronsLeft size={28} className="font-bold"/> Overview</h2>
                             <Image
                                 src={profile}
                                 alt="abc"
