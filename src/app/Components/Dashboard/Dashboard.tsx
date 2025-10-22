@@ -1,14 +1,16 @@
 'use client'
 
 import { Users } from 'lucide-react';
+import Image from 'next/image';
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import userImage from "@/../public/images/profile.jpg"
 
 export default function Dashboard() {
   const stats = [
-    { title: 'Total User', value: '25,648', icon: <Users size={24} color='#0ABF9D' className='font-bold'/> },
-    { title: 'Subscribers', value: '58,320', icon: <Users size={24} color='#0ABF9D' className='font-bold'/> },
-    { title: 'Total Earning', value: '$52,567.53', icon: <Users size={24} color='#0ABF9D' className='font-bold'/> },
+    { title: 'Total User', value: '25,648', icon: <Users size={24} color='#0ABF9D' className='font-bold' /> },
+    { title: 'Subscribers', value: '58,320', icon: <Users size={24} color='#0ABF9D' className='font-bold' /> },
+    { title: 'Total Earning', value: '$52,567.53', icon: <Users size={24} color='#0ABF9D' className='font-bold' /> },
   ];
 
   const users = [
@@ -18,6 +20,7 @@ export default function Dashboard() {
       email: 'demo59@gmail.com',
       registrationDate: 'January 20, 2025',
       subscription: 'Basic Protection',
+      image : userImage
     },
     {
       id: 2,
@@ -25,6 +28,7 @@ export default function Dashboard() {
       email: 'demo59@gmail.com',
       registrationDate: 'February 15, 2025',
       subscription: 'Silver Protection',
+      image : userImage
     },
     {
       id: 3,
@@ -32,6 +36,7 @@ export default function Dashboard() {
       email: 'demo59@gmail.com',
       registrationDate: 'March 10, 2025',
       subscription: 'Gold Protection',
+      image : userImage
     },
     {
       id: 4,
@@ -39,6 +44,7 @@ export default function Dashboard() {
       email: 'demo59@gmail.com',
       registrationDate: 'April 09, 2025',
       subscription: 'Basic Protection',
+      image : userImage
     },
   ];
 
@@ -141,44 +147,84 @@ export default function Dashboard() {
           <h2 className="text-lg font-semibold text-white mb-6">User</h2>
 
           {/* Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="text-left text-sm font-medium text-white pb-3">No</th>
-                  <th className="text-left text-sm font-medium text-white pb-3">Name</th>
-                  <th className="text-left text-sm font-medium text-white pb-3">Email</th>
-                  <th className="text-left text-sm font-medium text-white pb-3">Registration Date</th>
-                  <th className="text-left text-sm font-medium text-white pb-3">Subscriptions</th>
-                  <th className="text-left text-sm font-medium text-white pb-3">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map((user) => (
-                  <tr key={user.id} className="border-b border-gray-100">
-                    <td className="py-4 text-sm text-white">{user.id}</td>
-                    <td className="py-4 text-sm text-white">{user.name}</td>
-                    <td className="py-4 text-sm text-white">{user.email}</td>
-                    <td className="py-4 text-sm text-white">{user.registrationDate}</td>
-                    <td className="py-4 text-sm">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${user.subscription === 'Gold Protection'
-                        ? 'bg-yellow-100 text-yellow-800'
-                        : user.subscription === 'Silver Protection'
-                          ? 'bg-gray-100 text-gray-800'
-                          : 'bg-blue-100 text-blue-800'
-                        }`}>
-                        {user.subscription}
-                      </span>
-                    </td>
-                    <td className="py-4">
-                      <button className="text-red-600 hover:text-red-800 text-sm font-medium">
-                        Remove
-                      </button>
-                    </td>
+          <div className="rounded-lg shadow-sm border border-[#007ED6] overflow-hidden">
+            {/* Table */}
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="border-b border-[#007ED6]">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                      NO
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                      Name
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                      Email
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                      Registration Date
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                      Subscriptions
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                      Action
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="">
+                  {users.map((user) => (
+                    <tr key={user.id} className="">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                        {user.id}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
+                        <div className='flex items-center gap-3'>
+                          <Image
+                            src={user?.image}
+                            alt={user?.name}
+                            width={120}
+                            height={60}
+                            className='w-10 h-10 object-fill rounded'
+                          />
+                          {user.name}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-[#F9FAFB]">
+                        {user.email}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                        {user.registrationDate}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span
+                          className={`inline-flex px-2 py-1 text-xs font-semibold text-[#F9FAFB] `}
+                        >
+                          {user.subscription}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <div className="flex space-x-3">
+                          <button
+                            // onClick={() => handleBlock(user.id)}
+                            className="bg-[#0ABF9D4D] px-4 py-1 text-[#0ABF9D] rounded cursor-pointer font-medium transition-colors"
+                          >
+                            Block
+                          </button>
+                          <button
+                            // onClick={() => handleRemove(user.id)}
+                            className="bg-[#551214] px-4 py-1 text-[#FE4D4F] rounded cursor-pointer font-medium transition-colors"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>

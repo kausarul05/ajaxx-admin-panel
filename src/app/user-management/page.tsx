@@ -1,7 +1,9 @@
 'use client'
 
-import { Search } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import React, { useState, useMemo } from 'react';
+import userImage from "@/../public/images/profile.jpg"
+import Image from 'next/image';
 
 export default function UserManagement() {
     const [currentPage, setCurrentPage] = useState(1);
@@ -16,6 +18,7 @@ export default function UserManagement() {
             email: 'demo59@gmail.com',
             registrationDate: 'January 20, 2025',
             subscription: 'Basic Protection',
+            image : userImage
         },
         {
             id: 2,
@@ -23,6 +26,7 @@ export default function UserManagement() {
             email: 'demo59@gmail.com',
             registrationDate: 'February 15, 2025',
             subscription: 'Silver Protection',
+            image : userImage
         },
         {
             id: 3,
@@ -30,6 +34,7 @@ export default function UserManagement() {
             email: 'demo59@gmail.com',
             registrationDate: 'March 10, 2025',
             subscription: 'Gold Protection',
+            image : userImage
         },
         {
             id: 4,
@@ -37,6 +42,7 @@ export default function UserManagement() {
             email: 'demo59@gmail.com',
             registrationDate: 'April 09, 2025',
             subscription: 'Basic Protection',
+            image : userImage
         },
         {
             id: 5,
@@ -44,6 +50,7 @@ export default function UserManagement() {
             email: 'demo59@gmail.com',
             registrationDate: 'May 12, 2025',
             subscription: 'Silver Protection',
+            image : userImage
         },
         {
             id: 6,
@@ -51,6 +58,7 @@ export default function UserManagement() {
             email: 'demo59@gmail.com',
             registrationDate: 'June 12, 2025',
             subscription: 'Gold Protection',
+            image : userImage
         },
         {
             id: 7,
@@ -58,6 +66,7 @@ export default function UserManagement() {
             email: 'demo59@gmail.com',
             registrationDate: 'April 12, 2025',
             subscription: 'Basic Protection',
+            image : userImage
         },
         {
             id: 8,
@@ -65,6 +74,7 @@ export default function UserManagement() {
             email: 'demo59@gmail.com',
             registrationDate: 'April 12, 2025',
             subscription: 'Silver Protection',
+            image : userImage
         },
         {
             id: 9,
@@ -72,6 +82,7 @@ export default function UserManagement() {
             email: 'demo59@gmail.com',
             registrationDate: 'April 12, 2025',
             subscription: 'Gold Protection',
+            image : userImage
         },
         {
             id: 10,
@@ -79,6 +90,7 @@ export default function UserManagement() {
             email: 'demo59@gmail.com',
             registrationDate: 'April 12, 2025',
             subscription: 'Silver Protection',
+            image : userImage
         },
         {
             id: 11,
@@ -86,6 +98,7 @@ export default function UserManagement() {
             email: 'demo59@gmail.com',
             registrationDate: 'April 12, 2025',
             subscription: 'Basic Protection',
+            image : userImage
         },
         {
             id: 12,
@@ -93,6 +106,7 @@ export default function UserManagement() {
             email: 'demo59@gmail.com',
             registrationDate: 'June 22, 2025',
             subscription: 'Gold Protection',
+            image : userImage
         },
         {
             id: 13,
@@ -100,6 +114,7 @@ export default function UserManagement() {
             email: 'demo59@gmail.com',
             registrationDate: 'July 04, 2025',
             subscription: 'Silver Protection',
+            image : userImage
         },
         {
             id: 14,
@@ -107,6 +122,7 @@ export default function UserManagement() {
             email: 'demo59@gmail.com',
             registrationDate: 'July 20, 2025',
             subscription: 'Basic Protection',
+            image : userImage
         },
         {
             id: 15,
@@ -114,6 +130,7 @@ export default function UserManagement() {
             email: 'demo59@gmail.com',
             registrationDate: 'August 01, 2025',
             subscription: 'Gold Protection',
+            image : userImage
         },
         {
             id: 16,
@@ -121,6 +138,7 @@ export default function UserManagement() {
             email: 'demo59@gmail.com',
             registrationDate: 'August 11, 2025',
             subscription: 'Silver Protection',
+            image : userImage
         },
         {
             id: 17,
@@ -128,6 +146,7 @@ export default function UserManagement() {
             email: 'demo59@gmail.com',
             registrationDate: 'August 22, 2025',
             subscription: 'Basic Protection',
+            image : userImage
         },
         {
             id: 18,
@@ -135,6 +154,7 @@ export default function UserManagement() {
             email: 'demo59@gmail.com',
             registrationDate: 'September 03, 2025',
             subscription: 'Gold Protection',
+            image : userImage
         },
         {
             id: 19,
@@ -142,6 +162,7 @@ export default function UserManagement() {
             email: 'demo59@gmail.com',
             registrationDate: 'September 10, 2025',
             subscription: 'Silver Protection',
+            image : userImage
         },
         {
             id: 20,
@@ -149,6 +170,7 @@ export default function UserManagement() {
             email: 'demo59@gmail.com',
             registrationDate: 'September 22, 2025',
             subscription: 'Basic Protection',
+            image : userImage
         },
         {
             id: 21,
@@ -156,6 +178,7 @@ export default function UserManagement() {
             email: 'demo59@gmail.com',
             registrationDate: 'October 01, 2025',
             subscription: 'Gold Protection',
+            image : userImage
         },
         {
             id: 22,
@@ -163,6 +186,7 @@ export default function UserManagement() {
             email: 'demo59@gmail.com',
             registrationDate: 'October 10, 2025',
             subscription: 'Silver Protection',
+            image : userImage
         },
         {
             id: 23,
@@ -170,6 +194,7 @@ export default function UserManagement() {
             email: 'demo59@gmail.com',
             registrationDate: 'October 18, 2025',
             subscription: 'Basic Protection',
+            image : userImage
         },
         {
             id: 24,
@@ -177,6 +202,7 @@ export default function UserManagement() {
             email: 'demo59@gmail.com',
             registrationDate: 'October 25, 2025',
             subscription: 'Gold Protection',
+            image : userImage
         },
         {
             id: 25,
@@ -184,6 +210,7 @@ export default function UserManagement() {
             email: 'demo59@gmail.com',
             registrationDate: 'November 03, 2025',
             subscription: 'Silver Protection',
+            image : userImage
         },
         {
             id: 26,
@@ -191,6 +218,7 @@ export default function UserManagement() {
             email: 'demo59@gmail.com',
             registrationDate: 'November 10, 2025',
             subscription: 'Basic Protection',
+            image : userImage
         },
         {
             id: 27,
@@ -198,6 +226,7 @@ export default function UserManagement() {
             email: 'demo59@gmail.com',
             registrationDate: 'November 20, 2025',
             subscription: 'Gold Protection',
+            image : userImage
         },
         {
             id: 28,
@@ -205,6 +234,7 @@ export default function UserManagement() {
             email: 'demo59@gmail.com',
             registrationDate: 'December 02, 2025',
             subscription: 'Silver Protection',
+            image : userImage
         },
         {
             id: 29,
@@ -212,6 +242,7 @@ export default function UserManagement() {
             email: 'demo59@gmail.com',
             registrationDate: 'December 10, 2025',
             subscription: 'Basic Protection',
+            image : userImage
         },
         {
             id: 30,
@@ -219,6 +250,7 @@ export default function UserManagement() {
             email: 'demo59@gmail.com',
             registrationDate: 'December 20, 2025',
             subscription: 'Gold Protection',
+            image : userImage
         }
     ];
     ;
@@ -339,7 +371,16 @@ export default function UserManagement() {
                                             {user.id}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
-                                            {user.name}
+                                            <div className='flex items-center gap-3'>
+                                                <Image
+                                                    src={user?.image}
+                                                    alt={user?.name}
+                                                    width={120}
+                                                    height={60}
+                                                    className='w-10 h-10 object-fill rounded'
+                                                />
+                                                {user.name}
+                                            </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-[#F9FAFB]">
                                             {user.email}
@@ -394,17 +435,17 @@ export default function UserManagement() {
                             </div>
 
                             {/* Pagination Controls */}
-                            <div className="flex items-center space-x-1">
+                            <div className="flex items-center space-x-3">
                                 {/* Previous Button */}
                                 <button
                                     onClick={() => handlePageChange(currentPage - 1)}
                                     disabled={currentPage === 1}
-                                    className={`px-3 py-1 text-sm rounded transition-colors ${currentPage === 1
+                                    className={`w-10 h-10 font-bold text-sm rounded transition-colors cursor-pointer ${currentPage === 1
                                         ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                         : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                         }`}
                                 >
-                                    Previous
+                                    <ChevronLeft size={24} color='black' className='font-bold mx-auto'/>
                                 </button>
 
                                 {/* Page Numbers */}
@@ -412,8 +453,8 @@ export default function UserManagement() {
                                     <button
                                         key={page}
                                         onClick={() => handlePageChange(page)}
-                                        className={`px-3 py-1 text-sm rounded transition-colors ${currentPage === page
-                                            ? 'bg-blue-600 text-white hover:bg-blue-700'
+                                        className={`w-10 h-10 font-bold text-sm rounded transition-colors cursor-pointer ${currentPage === page
+                                            ? 'bg-[#245FE7] text-white'
                                             : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                             }`}
                                     >
@@ -425,12 +466,12 @@ export default function UserManagement() {
                                 <button
                                     onClick={() => handlePageChange(currentPage + 1)}
                                     disabled={currentPage === totalPages || totalPages === 0}
-                                    className={`px-3 py-1 text-sm rounded transition-colors ${currentPage === totalPages || totalPages === 0
+                                    className={`w-10 h-10 font-bold cursor-pointer text-sm rounded transition-colors ${currentPage === totalPages || totalPages === 0
                                         ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                         : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                         }`}
                                 >
-                                    Next
+                                    <ChevronRight size={24} color='black' className='font-bold mx-auto'/>
                                 </button>
                             </div>
                         </div>
