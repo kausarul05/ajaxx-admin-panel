@@ -6,7 +6,6 @@ import {
     Star,
     User,
     Lock,
-    LogOut,
     ChevronDown,
     ChevronRight
 } from "lucide-react";

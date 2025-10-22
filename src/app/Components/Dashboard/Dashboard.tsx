@@ -3,24 +3,54 @@
 import { Users } from 'lucide-react';
 import Image from 'next/image';
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, TooltipProps } from 'recharts';
 import userImage from "@/../public/images/profile.jpg"
 
+// Define types
+interface StatItem {
+  title: string;
+  value: string;
+  icon: React.ReactNode;
+}
+
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  registrationDate: string;
+  subscription: string;
+  image: typeof userImage;
+}
+
+interface ChartData {
+  month: string;
+  revenue: number;
+}
+
+interface CustomTooltipProps extends TooltipProps<number, string> {
+  active?: boolean;
+  payload?: Array<{
+    value: number;
+    payload: ChartData;
+  }>;
+  label?: string;
+}
+
 export default function Dashboard() {
-  const stats = [
+  const stats: StatItem[] = [
     { title: 'Total User', value: '25,648', icon: <Users size={24} color='#0ABF9D' className='font-bold' /> },
     { title: 'Subscribers', value: '58,320', icon: <Users size={24} color='#0ABF9D' className='font-bold' /> },
     { title: 'Total Earning', value: '$52,567.53', icon: <Users size={24} color='#0ABF9D' className='font-bold' /> },
   ];
 
-  const users = [
+  const users: User[] = [
     {
       id: 1,
       name: 'Savannah Nguyen',
       email: 'demo59@gmail.com',
       registrationDate: 'January 20, 2025',
       subscription: 'Basic Protection',
-      image : userImage
+      image: userImage
     },
     {
       id: 2,
@@ -28,7 +58,7 @@ export default function Dashboard() {
       email: 'demo59@gmail.com',
       registrationDate: 'February 15, 2025',
       subscription: 'Silver Protection',
-      image : userImage
+      image: userImage
     },
     {
       id: 3,
@@ -36,7 +66,7 @@ export default function Dashboard() {
       email: 'demo59@gmail.com',
       registrationDate: 'March 10, 2025',
       subscription: 'Gold Protection',
-      image : userImage
+      image: userImage
     },
     {
       id: 4,
@@ -44,12 +74,12 @@ export default function Dashboard() {
       email: 'demo59@gmail.com',
       registrationDate: 'April 09, 2025',
       subscription: 'Basic Protection',
-      image : userImage
+      image: userImage
     },
   ];
 
   // Chart data
-  const chartData = [
+  const chartData: ChartData[] = [
     { month: 'Jan', revenue: 18500 },
     { month: 'Feb', revenue: 21200 },
     { month: 'Mar', revenue: 19800 },
@@ -65,7 +95,7 @@ export default function Dashboard() {
   ];
 
   // Custom tooltip
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-white p-3 shadow-lg rounded-lg border">
@@ -182,8 +212,8 @@ export default function Dashboard() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
                         <div className='flex items-center gap-3'>
                           <Image
-                            src={user?.image}
-                            alt={user?.name}
+                            src={user.image}
+                            alt={user.name}
                             width={120}
                             height={60}
                             className='w-10 h-10 object-fill rounded'

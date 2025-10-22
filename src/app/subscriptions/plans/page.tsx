@@ -89,10 +89,10 @@ const plans = [
 export default function PlansManagement() {
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
-    const [selectedPlan, setSelectedPlan] = useState(null);
+    // const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
 
-    const handleEdit = (planName) => {
-        setSelectedPlan(planName);
+    const handleEdit = (planName: string) => {
+        // setSelectedPlan(planName);
         setShowEditModal(true);
     };
 

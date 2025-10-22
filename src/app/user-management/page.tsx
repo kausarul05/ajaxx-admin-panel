@@ -8,7 +8,7 @@ import Image from 'next/image';
 export default function UserManagement() {
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
-    const [filterSubscription, setFilterSubscription] = useState('all');
+    const [filterSubscription] = useState('all');
     const itemsPerPage = 10;
 
     const users = [
