@@ -33,6 +33,7 @@ export default function Sidebar() {
                 { href: "/subscriptions/subscribers", label: "Subscribers" }
             ]
         },
+        { href: "/products-management", icon: User, label: "Products Management" },
         { href: "/review-management", icon: User, label: "Review Management" },
         { href: "/settings", icon: Lock, label: "Settings" },
     ];
