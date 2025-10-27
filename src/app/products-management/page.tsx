@@ -5,83 +5,71 @@ import { CircleCheck, CircleX, Pencil, Plus, Trash } from "lucide-react";
 
 const plans = [
     {
-        name: "Basic",
+        name: "Norton AntiVirus Plus",
+        oldPrice: "US$ 29.99",
+        discount: "US$ 10 OFF*",
+        price: "US$24.99",
         duration: "month",
-        des: "All features included to keep your personal data safe.",
-        price: "$9.99",
         features: [
-            { text: "Free 7-day trial", available: true },
-            { text: "10 scans per month", available: true },
-            { text: "Support 24-7", available: true },
-            { text: "Removal of data from brokers databases", available: false },
-            { text: "Ongoing auto monitoring of user's personal info", available: false },
-            { text: "Export of results from scans", available: false },
-            { text: "Showing deleted users' data from brokers websites", available: false },
-            { text: "Enhanced tools to safeguard against scams, fraud, unwanted data exposure", available: false },
-            { text: "Expanded monitoring features", available: false },
-            { text: "Unlimited scans & monitoring", available: false },
-            { text: "All Gold package features", available: false },
-            { text: "Full yearly coverage", available: false },
+            "10 PCs, Macs, tablets, or phones",
+            "Antivirus, malware, ransomware, and hacking protection",
+            "100% Virus Protection Promise²",
+            "100GB Cloud Backup‡,4",
+            "Password Manager",
+            "VPN private internet connection",
+            "Dark Web Monitoring§",
+            "Parental Control‡",
         ],
     },
     {
-        name: "Silver",
+        name: "Norton AntiVirus Plus",
+        oldPrice: "US$ 29.99",
+        discount: "US$ 10 OFF*",
+        price: "US$24.99",
         duration: "month",
-        des: "Removal of data from data brokers databases and ongoing auto monitoring of your personal information.",
-        price: "$14.99",
         features: [
-            { text: "Free 7-day trial", available: true },
-            { text: "10 scans per month", available: true },
-            { text: "Support 24-7", available: false },
-            { text: "Removal of data from brokers databases", available: true },
-            { text: "Ongoing auto monitoring of user's personal info", available: true },
-            { text: "Export of results from scans", available: true },
-            { text: "Showing deleted users' data from brokers websites", available: true },
-            { text: "Enhanced tools to safeguard against scams, fraud, unwanted data exposure", available: false },
-            { text: "Expanded monitoring features", available: false },
-            { text: "Unlimited scans & monitoring", available: false },
-            { text: "All Gold package features", available: false },
-            { text: "Full yearly coverage", available: false },
+            "10 PCs, Macs, tablets, or phones",
+            "Antivirus, malware, ransomware, and hacking protection",
+            "100% Virus Protection Promise²",
+            "100GB Cloud Backup‡,4",
+            "Password Manager",
+            "VPN private internet connection",
+            "Dark Web Monitoring§",
+            "Parental Control‡",
         ],
     },
     {
-        name: "Gold",
+        name: "Norton AntiVirus Plus",
+        oldPrice: "US$ 29.99",
+        discount: "US$ 10 OFF*",
+        price: "US$24.99",
         duration: "month",
-        des: "Gain enhanced tools to safeguard against scams, fraud, and unwanted data exposure.",
-        price: "$29.99",
         features: [
-            { text: "Free 7-day trial", available: true },
-            { text: "10 scans per month", available: true },
-            { text: "Support 24-7", available: true },
-            { text: "Removal of data from brokers databases", available: true },
-            { text: "Ongoing auto monitoring of user's personal info", available: true },
-            { text: "Export of results from scans", available: true },
-            { text: "Showing deleted users' data from brokers websites", available: true },
-            { text: "Enhanced tools to safeguard against scams, fraud, unwanted data exposure", available: true },
-            { text: "Expanded monitoring features", available: true },
-            { text: "Unlimited scans & monitoring", available: true },
-            { text: "All Gold package features", available: true },
-            { text: "Full yearly coverage", available: false },
+            "10 PCs, Macs, tablets, or phones",
+            "Antivirus, malware, ransomware, and hacking protection",
+            "100% Virus Protection Promise²",
+            "100GB Cloud Backup‡,4",
+            "Password Manager",
+            "VPN private internet connection",
+            "Dark Web Monitoring§",
+            "Parental Control‡",
         ],
     },
     {
-        name: "Annual Plan",
-        duration: "year",
-        des: "Unlock all the same benefits as the Gold package.",
-        price: "$99",
+        name: "Norton AntiVirus Plus",
+        oldPrice: "US$ 29.99",
+        discount: "US$ 10 OFF*",
+        price: "US$24.99",
+        duration: "month",
         features: [
-            { text: "Free 7-day trial", available: true },
-            { text: "10 scans per month", available: true },
-            { text: "Support 24-7", available: true },
-            { text: "Removal of data from brokers databases", available: true },
-            { text: "Ongoing auto monitoring of user's personal info", available: true },
-            { text: "Export of results from scans", available: true },
-            { text: "Showing deleted users' data from brokers websites", available: true },
-            { text: "Enhanced tools to safeguard against scams, fraud, unwanted data exposure", available: true },
-            { text: "Expanded monitoring features", available: true },
-            { text: "Unlimited scans & monitoring", available: true },
-            { text: "All Gold package features", available: true },
-            { text: "Full yearly coverage", available: true },
+            "10 PCs, Macs, tablets, or phones",
+            "Antivirus, malware, ransomware, and hacking protection",
+            "100% Virus Protection Promise²",
+            "100GB Cloud Backup‡,4",
+            "Password Manager",
+            "VPN private internet connection",
+            "Dark Web Monitoring§",
+            "Parental Control‡",
         ],
     },
 ];
@@ -107,7 +95,7 @@ export default function ProductsManagement() {
                         onClick={() => setShowCreateModal(true)}
                         className="flex items-center cursor-pointer gap-2 bg-[#007ED6] hover:bg-[#006bb3] text-white px-4 py-2 rounded-lg font-medium"
                     >
-                        <Plus size={18} /> Create New Subscriptions
+                        <Plus size={18} /> Create New Product
                     </button>
                 </div>
 
@@ -118,28 +106,35 @@ export default function ProductsManagement() {
                             key={plan.name}
                             className="bg-[#0A2131] border border-[#1b4b70] rounded-xl p-6 relative"
                         >
-                            <h2 className="text-lg font-semibold mb-2 text-[#00aaff]">
+                            <h4 className="text-[18px] font-semibold text-white mb-6 text-center">
                                 {plan.name}
-                            </h2>
-                            <p className="text-sm text-gray-300 mb-4">{plan.des}</p>
+                                <span className="text-[#007ED6]"> Plus</span>
+                            </h4>
 
-                            <p className="text-3xl font-bold mb-4">
+                            <p className="text-gray-400 text-sm mb-5 text-center">
+                                <span className="line-through text-white">{plan.oldPrice}</span>{" "}
+                                <span className="text-[#007ED6] font-medium">
+                                    {plan.discount}
+                                </span>
+                            </p>
+
+                            <p className="text-[#007ED6] text-3xl font-bold mb-6 text-center">
                                 {plan.price}
-                                <span className="text-base font-medium text-gray-400">
+                                <span className="text-gray-300 text-sm font-normal">
                                     /{plan.duration}
                                 </span>
                             </p>
 
-                            <ul className="space-y-2 text-sm mb-4">
+                            <ul className="space-y-4 text-sm mb-4">
                                 {plan.features.map((feature, idx) => (
                                     <li key={idx} className="flex items-center gap-2">
-                                        {feature.available ? (
-                                            <CircleCheck size={14} className="text-[#007ED6]" />
-                                        ) : (
+                                        {/* {feature.available ? ( */}
+                                        <CircleCheck size={14} className="text-[#007ED6]" />
+                                        {/* ) : (
                                             <CircleX size={14} className="text-[#EB4335]" />
-                                        )}
+                                        )} */}
 
-                                        {feature?.text}
+                                        <span>{feature}</span>
                                     </li>
                                 ))}
                             </ul>
@@ -164,7 +159,7 @@ export default function ProductsManagement() {
                     <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-50">
                         <div className="bg-[#0e304a] border border-[#1b4b70] rounded-lg p-6 w-[90%] max-w-2xl text-white">
                             <h2 className="text-xl font-semibold mb-6">
-                                Create Subscriptions
+                                Products Management
                             </h2>
 
                             {/* Plan Name & Price Row */}
@@ -176,10 +171,10 @@ export default function ProductsManagement() {
                                     </div>
                                     <div className="flex w-full gap-4">
                                         <div className="flex-1 ">
-                                            <label className="block text-sm font-medium mb-2">Plan name</label>
+                                            <label className="block text-sm font-medium mb-2">Add Category</label>
                                             <input
                                                 type="text"
-                                                placeholder="Enter plan name"
+                                                placeholder="Enter Category name"
                                                 className="bg-[#0A2131] border border-[#1b4b70] rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-[#007ED6] placeholder-gray-400 w-full"
                                             />
                                         </div>
@@ -204,18 +199,18 @@ export default function ProductsManagement() {
                                     </div> */}
                                     <div className="flex w-full gap-4">
                                         <div className="flex-1 ">
-                                            <label className="block text-sm font-medium mb-2">Limit</label>
+                                            <label className="block text-sm font-medium mb-2">Old Price</label>
                                             <input
                                                 type="text"
-                                                placeholder="Enter Limit"
+                                                placeholder="Enter Old Price"
                                                 className="bg-[#0A2131] border border-[#1b4b70] rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-[#007ED6] placeholder-gray-400 w-full"
                                             />
                                         </div>
                                         <div className="flex-1 ">
-                                            <label className="block text-sm font-medium mb-2">Visibility Type</label>
+                                            <label className="block text-sm font-medium mb-2">Add Link</label>
                                             <input
                                                 type="text"
-                                                placeholder="Enter Visibility Type"
+                                                placeholder="Enter Add Link"
                                                 className="bg-[#0A2131] border border-[#1b4b70] rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-[#007ED6] placeholder-gray-400 w-full"
                                             />
                                         </div>
@@ -257,7 +252,7 @@ export default function ProductsManagement() {
                     <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-50">
                         <div className="bg-[#0e304a] border border-[#1b4b70] rounded-lg p-6 w-[90%] max-w-2xl text-white">
                             <h2 className="text-xl font-semibold mb-6">
-                                Edit Subscriptions
+                                Edit Product
                             </h2>
 
                             {/* Plan Name & Price Row */}
@@ -269,10 +264,10 @@ export default function ProductsManagement() {
                                     </div>
                                     <div className="flex w-full gap-4">
                                         <div className="flex-1 ">
-                                            <label className="block text-sm font-medium mb-2">Plan name</label>
+                                            <label className="block text-sm font-medium mb-2">Add Category</label>
                                             <input
                                                 type="text"
-                                                placeholder="Enter plan name"
+                                                placeholder="Enter Add Category"
                                                 className="bg-[#0A2131] border border-[#1b4b70] rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-[#007ED6] placeholder-gray-400 w-full"
                                             />
                                         </div>
@@ -280,7 +275,7 @@ export default function ProductsManagement() {
                                             <label className="block text-sm font-medium mb-2">Price</label>
                                             <input
                                                 type="text"
-                                                placeholder="Enter price"
+                                                placeholder="%25.99"
                                                 className="bg-[#0A2131] border border-[#1b4b70] rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-[#007ED6] placeholder-gray-400 w-full"
                                             />
                                         </div>
@@ -297,18 +292,18 @@ export default function ProductsManagement() {
                                     </div> */}
                                     <div className="flex w-full gap-4">
                                         <div className="flex-1 ">
-                                            <label className="block text-sm font-medium mb-2">Limit</label>
+                                            <label className="block text-sm font-medium mb-2">Old Price</label>
                                             <input
                                                 type="text"
-                                                placeholder="Enter Limit"
+                                                placeholder="$29.99"
                                                 className="bg-[#0A2131] border border-[#1b4b70] rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-[#007ED6] placeholder-gray-400 w-full"
                                             />
                                         </div>
                                         <div className="flex-1 ">
-                                            <label className="block text-sm font-medium mb-2">Visibility Type</label>
+                                            <label className="block text-sm font-medium mb-2">Add Link</label>
                                             <input
                                                 type="text"
-                                                placeholder="Enter Visibility Type"
+                                                placeholder="Enter Your Product Detail link"
                                                 className="bg-[#0A2131] border border-[#1b4b70] rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-[#007ED6] placeholder-gray-400 w-full"
                                             />
                                         </div>
