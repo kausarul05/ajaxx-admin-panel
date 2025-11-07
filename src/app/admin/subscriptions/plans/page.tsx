@@ -1,104 +1,126 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CircleCheck, CircleX, Pencil, Plus, Trash } from "lucide-react";
+import { apiRequest } from '@/app/lib/api';
 
-const plans = [
-    {
-        name: "Basic",
-        duration: "month",
-        des: "All features included to keep your personal data safe.",
-        price: "$9.99",
-        features: [
-            { text: "Free 7-day trial", available: true },
-            { text: "10 scans per month", available: true },
-            { text: "Support 24-7", available: true },
-            { text: "Removal of data from brokers databases", available: false },
-            { text: "Ongoing auto monitoring of user's personal info", available: false },
-            { text: "Export of results from scans", available: false },
-            { text: "Showing deleted users' data from brokers websites", available: false },
-            { text: "Enhanced tools to safeguard against scams, fraud, unwanted data exposure", available: false },
-            { text: "Expanded monitoring features", available: false },
-            { text: "Unlimited scans & monitoring", available: false },
-            { text: "All Gold package features", available: false },
-            { text: "Full yearly coverage", available: false },
-        ],
-    },
-    {
-        name: "Silver",
-        duration: "month",
-        des: "Removal of data from data brokers databases and ongoing auto monitoring of your personal information.",
-        price: "$14.99",
-        features: [
-            { text: "Free 7-day trial", available: true },
-            { text: "10 scans per month", available: true },
-            { text: "Support 24-7", available: false },
-            { text: "Removal of data from brokers databases", available: true },
-            { text: "Ongoing auto monitoring of user's personal info", available: true },
-            { text: "Export of results from scans", available: true },
-            { text: "Showing deleted users' data from brokers websites", available: true },
-            { text: "Enhanced tools to safeguard against scams, fraud, unwanted data exposure", available: false },
-            { text: "Expanded monitoring features", available: false },
-            { text: "Unlimited scans & monitoring", available: false },
-            { text: "All Gold package features", available: false },
-            { text: "Full yearly coverage", available: false },
-        ],
-    },
-    {
-        name: "Gold",
-        duration: "month",
-        des: "Gain enhanced tools to safeguard against scams, fraud, and unwanted data exposure.",
-        price: "$29.99",
-        features: [
-            { text: "Free 7-day trial", available: true },
-            { text: "10 scans per month", available: true },
-            { text: "Support 24-7", available: true },
-            { text: "Removal of data from brokers databases", available: true },
-            { text: "Ongoing auto monitoring of user's personal info", available: true },
-            { text: "Export of results from scans", available: true },
-            { text: "Showing deleted users' data from brokers websites", available: true },
-            { text: "Enhanced tools to safeguard against scams, fraud, unwanted data exposure", available: true },
-            { text: "Expanded monitoring features", available: true },
-            { text: "Unlimited scans & monitoring", available: true },
-            { text: "All Gold package features", available: true },
-            { text: "Full yearly coverage", available: false },
-        ],
-    },
-    {
-        name: "Annual Plan",
-        duration: "year",
-        des: "Unlock all the same benefits as the Gold package.",
-        price: "$99",
-        features: [
-            { text: "Free 7-day trial", available: true },
-            { text: "10 scans per month", available: true },
-            { text: "Support 24-7", available: true },
-            { text: "Removal of data from brokers databases", available: true },
-            { text: "Ongoing auto monitoring of user's personal info", available: true },
-            { text: "Export of results from scans", available: true },
-            { text: "Showing deleted users' data from brokers websites", available: true },
-            { text: "Enhanced tools to safeguard against scams, fraud, unwanted data exposure", available: true },
-            { text: "Expanded monitoring features", available: true },
-            { text: "Unlimited scans & monitoring", available: true },
-            { text: "All Gold package features", available: true },
-            { text: "Full yearly coverage", available: true },
-        ],
-    },
-];
+interface Feature {
+    id: number;
+    description: string;
+}
+
+interface Subscription {
+    id: number;
+    title: string;
+    Description: string;
+    price: string;
+    billing_cycle: string;
+    features: Feature[];
+}
+
+interface ApiResponse {
+    success: boolean;
+    message: string;
+    data: Subscription[];
+}
 
 export default function PlansManagement() {
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
-    // const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+    const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [selectedPlan, setSelectedPlan] = useState<Subscription | null>(null);
 
-    const handleEdit = (planName: string) => {
-        // setSelectedPlan(planName);
-        console.log(planName)
+    // Fetch subscriptions from API
+    const fetchSubscriptions = async () => {
+        try {
+            setLoading(true);
+            const response: ApiResponse = await apiRequest("GET", "/payment/subscriptions", null, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("authToken")}`
+                }
+            });
+
+            if (response.success) {
+                setSubscriptions(response.data);
+            } else {
+                console.error('Failed to fetch subscriptions:', response.message);
+                setSubscriptions([]);
+            }
+        } catch (error) {
+            console.error('Failed to fetch subscriptions:', error);
+            setSubscriptions([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchSubscriptions();
+    }, []);
+
+    const handleEdit = (subscription: Subscription) => {
+        setSelectedPlan(subscription);
         setShowEditModal(true);
     };
 
+    const handleDelete = async (subscriptionId: number) => {
+        if (!confirm('Are you sure you want to delete this subscription?')) {
+            return;
+        }
+
+        try {
+            // Assuming your delete API endpoint - adjust if different
+            await apiRequest("DELETE", `/payment/subscriptions/${subscriptionId}/`, null, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("authToken")}`
+                }
+            });
+            
+            // Remove subscription from local state immediately
+            setSubscriptions(prev => prev.filter(sub => sub.id !== subscriptionId));
+            
+            alert('Subscription deleted successfully');
+            
+        } catch (error: any) {
+            console.error('Failed to delete subscription:', error);
+            alert(error?.error || 'Failed to delete subscription');
+        }
+    };
+
+    // Map API data to your feature structure
+    const getFeaturesList = (subscription: Subscription) => {
+        // You can customize this mapping based on your needs
+        const defaultFeatures = [
+        ];
+
+        // Map API features to your structure
+        const apiFeatures = subscription.features.map(feature => ({
+            text: feature.description,
+            available: true
+        }));
+
+        // Combine with default features (you can adjust this logic as needed)
+        return [...apiFeatures, ...defaultFeatures.slice(apiFeatures.length)];
+    };
+
+    // Get display duration
+    const getDisplayDuration = (billingCycle: string) => {
+        return billingCycle === 'monthly' ? 'month' : 'year';
+    };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-[#0A2131] text-white px-6 py-8">
+                <div className="bg-[#0D314B] rounded-lg p-6 h-screen flex items-center justify-center">
+                    <div className="text-white">Loading subscriptions...</div>
+                </div>
+            </div>
+        );
+    }
+
     return (
-        <div className="min-h-screen bg-[#0A2131] text-white px-6 py-8">
+        <div className=" bg-[#0A2131] text-white px-6 py-8">
             <div className="bg-[#0D314B] rounded-lg p-6 h-screen">
                 {/* Header */}
                 <div className="flex justify-between items-center mb-8 border-b border-[#1b3b56] pb-4">
@@ -113,50 +135,55 @@ export default function PlansManagement() {
 
                 {/* Plans */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    {plans.map((plan) => (
-                        <div
-                            key={plan.name}
-                            className="bg-[#0A2131] border border-[#1b4b70] rounded-xl p-6 relative"
-                        >
-                            <h2 className="text-lg font-semibold mb-2 text-[#00aaff]">
-                                {plan.name}
-                            </h2>
-                            <p className="text-sm text-gray-300 mb-4">{plan.des}</p>
+                    {subscriptions.map((subscription) => {
+                        const features = getFeaturesList(subscription);
+                        return (
+                            <div
+                                key={subscription.id}
+                                className="bg-[#0A2131] border border-[#1b4b70] rounded-xl p-6 relative"
+                            >
+                                <h2 className="text-lg font-semibold mb-2 text-[#00aaff]">
+                                    {subscription.title}
+                                </h2>
+                                <p className="text-sm text-gray-300 mb-4">{subscription.Description}</p>
 
-                            <p className="text-3xl font-bold mb-4">
-                                {plan.price}
-                                <span className="text-base font-medium text-gray-400">
-                                    /{plan.duration}
-                                </span>
-                            </p>
+                                <p className="text-3xl font-bold mb-4">
+                                    ${subscription.price}
+                                    <span className="text-base font-medium text-gray-400">
+                                        /{getDisplayDuration(subscription.billing_cycle)}
+                                    </span>
+                                </p>
 
-                            <ul className="space-y-2 text-sm mb-4">
-                                {plan.features.map((feature, idx) => (
-                                    <li key={idx} className="flex items-center gap-2">
-                                        {feature.available ? (
-                                            <CircleCheck size={14} className="text-[#007ED6]" />
-                                        ) : (
-                                            <CircleX size={14} className="text-[#EB4335]" />
-                                        )}
+                                <ul className="space-y-2 text-sm mb-4">
+                                    {features.map((feature, idx) => (
+                                        <li key={idx} className="flex items-center gap-2">
+                                            {feature.available ? (
+                                                <CircleCheck size={14} className="text-[#007ED6]" />
+                                            ) : (
+                                                <CircleX size={14} className="text-[#EB4335]" />
+                                            )}
+                                            {feature.text}
+                                        </li>
+                                    ))}
+                                </ul>
 
-                                        {feature?.text}
-                                    </li>
-                                ))}
-                            </ul>
-
-                            <div className="flex justify-end gap-3 mt-4">
-                                <button
-                                    onClick={() => handleEdit(plan.name)}
-                                    className="p-2 rounded-full border border-[#007ED6] hover:bg-[#12446a]"
-                                >
-                                    <Pencil size={16} />
-                                </button>
-                                <button className="p-2 rounded-full border border-[#EB4335] hover:bg-[#12446a]">
-                                    <Trash size={16} className="text-[#EB4335]" />
-                                </button>
+                                <div className="flex justify-end gap-3 mt-4">
+                                    <button
+                                        onClick={() => handleEdit(subscription)}
+                                        className="p-2 rounded-full border border-[#007ED6] hover:bg-[#12446a]"
+                                    >
+                                        <Pencil size={16} />
+                                    </button>
+                                    <button 
+                                        onClick={() => handleDelete(subscription.id)}
+                                        className="p-2 rounded-full border border-[#EB4335] hover:bg-[#12446a]"
+                                    >
+                                        <Trash size={16} className="text-[#EB4335]" />
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
 
                 {/* Create Modal */}
@@ -170,10 +197,6 @@ export default function PlansManagement() {
                             {/* Plan Name & Price Row */}
                             <div className="grid gap-6 mb-6">
                                 <div className="w-full">
-                                    <div className="flex justify-between items-center mb-2">
-                                        {/* <label className="block text-sm font-medium">Plan name</label> */}
-                                        {/* <label className="block text-sm font-medium">Price</label> */}
-                                    </div>
                                     <div className="flex w-full gap-4">
                                         <div className="flex-1 ">
                                             <label className="block text-sm font-medium mb-2">Plan name</label>
@@ -198,10 +221,6 @@ export default function PlansManagement() {
                             {/* Limit & Visibility Type Row */}
                             <div className="mb-6">
                                 <div>
-                                    {/* <div className="flex justify-between items-center mb-2">
-                                        <label className="block text-sm font-medium">Limit</label>
-                                        <label className="block text-sm font-medium">Visibility Type</label>
-                                    </div> */}
                                     <div className="flex w-full gap-4">
                                         <div className="flex-1 ">
                                             <label className="block text-sm font-medium mb-2">Limit</label>
@@ -253,7 +272,7 @@ export default function PlansManagement() {
                 )}
 
                 {/* Edit Modal */}
-                {showEditModal && (
+                {showEditModal && selectedPlan && (
                     <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-50">
                         <div className="bg-[#0e304a] border border-[#1b4b70] rounded-lg p-6 w-[90%] max-w-2xl text-white">
                             <h2 className="text-xl font-semibold mb-6">
@@ -263,16 +282,13 @@ export default function PlansManagement() {
                             {/* Plan Name & Price Row */}
                             <div className="grid gap-6 mb-6">
                                 <div className="w-full">
-                                    <div className="flex justify-between items-center mb-2">
-                                        {/* <label className="block text-sm font-medium">Plan name</label> */}
-                                        {/* <label className="block text-sm font-medium">Price</label> */}
-                                    </div>
                                     <div className="flex w-full gap-4">
                                         <div className="flex-1 ">
                                             <label className="block text-sm font-medium mb-2">Plan name</label>
                                             <input
                                                 type="text"
                                                 placeholder="Enter plan name"
+                                                defaultValue={selectedPlan.title}
                                                 className="bg-[#0A2131] border border-[#1b4b70] rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-[#007ED6] placeholder-gray-400 w-full"
                                             />
                                         </div>
@@ -281,6 +297,7 @@ export default function PlansManagement() {
                                             <input
                                                 type="text"
                                                 placeholder="Enter price"
+                                                defaultValue={selectedPlan.price}
                                                 className="bg-[#0A2131] border border-[#1b4b70] rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-[#007ED6] placeholder-gray-400 w-full"
                                             />
                                         </div>
@@ -291,10 +308,6 @@ export default function PlansManagement() {
                             {/* Limit & Visibility Type Row */}
                             <div className="mb-6">
                                 <div>
-                                    {/* <div className="flex justify-between items-center mb-2">
-                                        <label className="block text-sm font-medium">Limit</label>
-                                        <label className="block text-sm font-medium">Visibility Type</label>
-                                    </div> */}
                                     <div className="flex w-full gap-4">
                                         <div className="flex-1 ">
                                             <label className="block text-sm font-medium mb-2">Limit</label>
@@ -322,6 +335,7 @@ export default function PlansManagement() {
                                 <textarea
                                     placeholder="Type here..."
                                     rows={4}
+                                    defaultValue={selectedPlan.Description}
                                     className="w-full bg-[#0A2131] border border-[#1b4b70] rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-[#007ED6] placeholder-gray-400 resize-none"
                                 />
                             </div>

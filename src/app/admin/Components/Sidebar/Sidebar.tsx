@@ -29,8 +29,8 @@ export default function Sidebar() {
             label: "Subscriptions Management",
             hasNested: true,
             nestedItems: [
-                { href: "/subscriptions/plans", label: "Plans" },
-                { href: "/subscriptions/subscribers", label: "Subscribers" }
+                { href: "/admin/subscriptions/plans", label: "Plans" },
+                { href: "/admin/subscriptions/subscribers", label: "Subscribers" }
             ]
         },
         { href: "/admin/products-management", icon: User, label: "Products Management" },

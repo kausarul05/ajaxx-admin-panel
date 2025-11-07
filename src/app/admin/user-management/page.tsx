@@ -1,7 +1,7 @@
 'use client'
 
 import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import userImage from "@/../public/images/profile.jpg"
 import Image from 'next/image';
 import { apiRequest } from '@/app/lib/api';
@@ -11,6 +11,7 @@ interface User {
     Fullname: string;
     email: string;
     date_joined: string;
+    is_active?: boolean;
 }
 
 interface ApiResponse {
@@ -21,24 +22,39 @@ interface ApiResponse {
     results: User[];
 }
 
+interface BlockResponse {
+    detail: string;
+}
+
+interface DeleteResponse {
+    detail: string;
+}
+
 export default function UserManagement() {
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
-    const [filterSubscription] = useState('all');
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
     const [totalItems, setTotalItems] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
+    const [actionLoading, setActionLoading] = useState<number | null>(null); // Track which user action is loading
     const itemsPerPage = 10;
 
-
-    // Fetch users from API
-    const fetchUsers = async (page: number) => {
+    // Fetch users from API with search
+    const fetchUsers = async (page: number, search: string = '') => {
         try {
             setLoading(true);
-            const data: ApiResponse = await apiRequest("GET", `/accounts/user_all/?page=${page}&page_size=${itemsPerPage}`, null, {
-                headers : {
-                    Authorization : `Bearer ${localStorage.getItem("authToken")}`
+            // Build query parameters
+            let endpoint = `/accounts/user_all/?page=${page}&page_size=${itemsPerPage}`;
+            
+            // Add search parameter if search term exists
+            if (search) {
+                endpoint += `&search=${encodeURIComponent(search)}`;
+            }
+
+            const data: ApiResponse = await apiRequest("GET", endpoint, null, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("authToken")}`
                 }
             });
 
@@ -49,41 +65,132 @@ export default function UserManagement() {
         } catch (error) {
             console.error('Failed to fetch users:', error);
             setUsers([]);
+            setTotalItems(0);
+            setTotalPages(0);
         } finally {
             setLoading(false);
         }
     };
 
+    // Block user function
+    const handleBlock = async (userId: number) => {
+        try {
+            setActionLoading(userId);
+            const response: BlockResponse = await apiRequest("POST", `/accounts/BlockUser/${userId}/`, null, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("authToken")}`
+                }
+            });
+            
+            console.log('Block response:', response);
+            
+            // Update local state to reflect the block status immediately
+            setUsers(prevUsers => 
+                prevUsers.map(user => 
+                    user.id === userId ? { ...user, is_active: false } : user
+                )
+            );
+            
+            // Show success message
+            alert(response.detail || 'User blocked successfully');
+            
+        } catch (error: any) {
+            console.error('Failed to block user:', error);
+            alert(error?.error || 'Failed to block user');
+        } finally {
+            setActionLoading(null);
+        }
+    };
+
+    // Unblock user function
+    const handleUnblock = async (userId: number) => {
+        try {
+            setActionLoading(userId);
+            const response: BlockResponse = await apiRequest("POST", `/accounts/BlockUser/${userId}/unblock/`, null, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("authToken")}`
+                }
+            });
+            
+            console.log('Unblock response:', response);
+            
+            // Update local state to reflect the unblock status immediately
+            setUsers(prevUsers => 
+                prevUsers.map(user => 
+                    user.id === userId ? { ...user, is_active: true } : user
+                )
+            );
+            
+            // Show success message
+            alert(response.detail || 'User unblocked successfully');
+            
+        } catch (error: any) {
+            console.error('Failed to unblock user:', error);
+            alert(error?.error || 'Failed to unblock user');
+        } finally {
+            setActionLoading(null);
+        }
+    };
+
+    // Remove user function
+    const handleRemove = async (userId: number) => {
+        if (!confirm('Are you sure you want to remove this user? This action cannot be undone.')) {
+            return;
+        }
+
+        try {
+            setActionLoading(userId);
+            // Assuming your delete API endpoint - adjust if different
+            const response: DeleteResponse = await apiRequest("DELETE", `/accounts/user_all/${userId}/`, null, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("authToken")}`
+                }
+            });
+            
+            console.log('Remove response:', response);
+            
+            // Remove user from local state immediately
+            setUsers(prevUsers => prevUsers.filter(user => user.id !== userId));
+            setTotalItems(prev => prev - 1);
+            
+            // Show success message
+            alert(response.detail || 'User removed successfully');
+            
+            // If current page becomes empty, go to previous page
+            if (users.length === 1 && currentPage > 1) {
+                setCurrentPage(currentPage - 1);
+            }
+            
+        } catch (error: any) {
+            console.error('Failed to remove user:', error);
+            alert(error?.error || 'Failed to remove user');
+        } finally {
+            setActionLoading(null);
+        }
+    };
+
+    // Initial load and when page changes
     useEffect(() => {
-        fetchUsers(currentPage);
+        fetchUsers(currentPage, searchTerm);
     }, [currentPage]);
 
-    // Filter users based on search term and subscription filter
-    const filteredUsers = useMemo(() => {
-        return users.filter(user => {
-            const matchesSearch =
-                (user.Fullname?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    user.email.toLowerCase().includes(searchTerm.toLowerCase()));
-            const matchesSubscription = filterSubscription === 'all';
-            return matchesSearch && matchesSubscription;
-        });
-    }, [users, searchTerm, filterSubscription]);
+    // Debounced search - fetch new data when search term changes
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            if (currentPage === 1) {
+                fetchUsers(1, searchTerm);
+            } else {
+                setCurrentPage(1); // This will trigger the useEffect above
+            }
+        }, 500); // 500ms debounce
 
-    // Calculate pagination values for current filtered results
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    const currentUsers = filteredUsers.slice(startIndex, endIndex);
-
-    // Reset to first page when filters change
-    React.useEffect(() => {
-        setCurrentPage(1);
-    }, [searchTerm, filterSubscription]);
+        return () => clearTimeout(timeoutId);
+    }, [searchTerm]);
 
     // Handle page change
     const handlePageChange = (page: number) => {
         if (page >= 1 && page <= totalPages) {
             setCurrentPage(page);
-            // The useEffect will trigger the API call with the new page
         }
     };
 
@@ -107,16 +214,6 @@ export default function UserManagement() {
         return pageNumbers;
     };
 
-    const handleBlock = (userId: number) => {
-        console.log(`Block user ${userId}`);
-        // Add your block logic here
-    };
-
-    const handleRemove = (userId: number) => {
-        console.log(`Remove user ${userId}`);
-        // Add your remove logic here
-    };
-
     // Format date to match your design
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
@@ -132,6 +229,10 @@ export default function UserManagement() {
         return user.Fullname || user.email.split('@')[0] || 'Unknown User';
     };
 
+    // Calculate display values for current page
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+
     return (
         <div className="min-h-screen  p-6">
             <div className='bg-[#0D314B] rounded-lg'>
@@ -141,7 +242,7 @@ export default function UserManagement() {
                     <div className='relative'>
                         <input
                             type="text"
-                            placeholder="Search"
+                            placeholder="Search by name or email"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="w-full px-4 py-2 border border-[#007ED6] rounded-lg focus:ring-2 focus:ring-[#007ED6] focus:border-[#007ED6]"
@@ -173,6 +274,9 @@ export default function UserManagement() {
                                         Subscriptions
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                                        Status
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                                         Action
                                     </th>
                                 </tr>
@@ -181,20 +285,20 @@ export default function UserManagement() {
                                 {loading ? (
                                     // Loading state
                                     <tr>
-                                        <td colSpan={6} className="px-6 py-4 text-center text-white">
+                                        <td colSpan={7} className="px-6 py-4 text-center text-white">
                                             Loading users...
                                         </td>
                                     </tr>
-                                ) : currentUsers.length === 0 ? (
+                                ) : users.length === 0 ? (
                                     // No users state
                                     <tr>
-                                        <td colSpan={6} className="px-6 py-4 text-center text-white">
-                                            No users found
+                                        <td colSpan={7} className="px-6 py-4 text-center text-white">
+                                            {searchTerm ? 'No users found matching your search' : 'No users found'}
                                         </td>
                                     </tr>
                                 ) : (
-                                    // Users data
-                                    currentUsers.map((user, index) => (
+                                    // Users data - use the users from API directly
+                                    users.map((user, index) => (
                                         <tr key={user.id} className="">
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
                                                 {startIndex + index + 1}
@@ -224,20 +328,75 @@ export default function UserManagement() {
                                                     Basic Protection
                                                 </span>
                                             </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <span
+                                                    className={`inline-flex px-2 py-1 text-xs font-semibold rounded ${
+                                                        user.is_active === false 
+                                                            ? 'bg-red-500/20 text-red-300 border border-red-500' 
+                                                            : 'bg-green-500/20 text-green-300 border border-green-500'
+                                                    }`}
+                                                >
+                                                    {user.is_active === false ? 'Blocked' : 'Active'}
+                                                </span>
+                                            </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                 <div className="flex space-x-3">
-                                                    <button
-                                                        onClick={() => handleBlock(user.id)}
-                                                        className="bg-[#0ABF9D4D] px-4 py-1 text-[#0ABF9D] rounded cursor-pointer font-medium transition-colors"
-                                                    >
-                                                        Block
-                                                    </button>
-                                                    <button
+                                                    {user.is_active === false ? (
+                                                        // Show Unblock button for blocked users
+                                                        <button
+                                                            onClick={() => handleUnblock(user.id)}
+                                                            disabled={actionLoading === user.id}
+                                                            className="bg-[#0ABF9D4D] px-4 py-1 text-[#0ABF9D] rounded cursor-pointer font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                                        >
+                                                            {actionLoading === user.id ? (
+                                                                <>
+                                                                    <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                                    </svg>
+                                                                    Unblocking...
+                                                                </>
+                                                            ) : (
+                                                                'Unblock'
+                                                            )}
+                                                        </button>
+                                                    ) : (
+                                                        // Show Block button for active users
+                                                        <button
+                                                            onClick={() => handleBlock(user.id)}
+                                                            disabled={actionLoading === user.id}
+                                                            className="bg-[#0ABF9D4D] px-4 py-1 text-[#0ABF9D] rounded cursor-pointer font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                                        >
+                                                            {actionLoading === user.id ? (
+                                                                <>
+                                                                    <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                                    </svg>
+                                                                    Blocking...
+                                                                </>
+                                                            ) : (
+                                                                'Block'
+                                                            )}
+                                                        </button>
+                                                    )}
+                                                    {/* <button
                                                         onClick={() => handleRemove(user.id)}
-                                                        className="bg-[#551214] px-4 py-1 text-[#FE4D4F] rounded cursor-pointer font-medium transition-colors"
+                                                        disabled={actionLoading === user.id}
+                                                        className="bg-[#551214] px-4 py-1 text-[#FE4D4F] rounded cursor-pointer font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                                     >
-                                                        Remove
-                                                    </button>
+                                                        {actionLoading === user.id ? (
+                                                            <>
+                                                                <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                                </svg>
+                                                                Removing...
+                                                            </>
+                                                        ) : (
+                                                            'Remove'
+                                                        )}
+                                                    </button> */}
                                                 </div>
                                             </td>
                                         </tr>
@@ -258,7 +417,7 @@ export default function UserManagement() {
                                 </span>{' '}
                                 to{' '}
                                 <span className="font-medium">
-                                    {Math.min(endIndex, totalItems)}
+                                    {endIndex}
                                 </span>{' '}
                                 of{' '}
                                 <span className="font-medium">{totalItems}</span> results
