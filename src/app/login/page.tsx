@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { apiRequest } from "@/app/lib/api"; // Update the import path
 
 type LoginFormData = {
   email: string;
@@ -45,28 +46,28 @@ export default function LoginPage() {
     setIsLoading(true);
     setError("");
 
-    // try {
-    //   const payload = {
-    //     email: formData.email,
-    //     password: formData.password,
-    //   };
+    try {
+      const payload = {
+        email: formData.email,
+        password: formData.password,
+      };
 
-    //   const data = await apiRequest("POST", "/accounts/login/", payload);
+      const data = await apiRequest("POST", "/accounts/login/", payload);
 
-    //   if (data.access || data.user) {
-    //     if (data.access) localStorage.setItem("authToken", data.access);
-    //     if (data.user) localStorage.setItem("userData", JSON.stringify(data.user));
-    //     if (formData.rememberMe) localStorage.setItem("rememberMe", "true");
+      if (data.access || data.user) {
+        if (data.access) localStorage.setItem("authToken", data.access);
+        if (data.user) localStorage.setItem("userData", JSON.stringify(data.user));
+        if (formData.rememberMe) localStorage.setItem("rememberMe", "true");
 
-    //     router.push("/dashboard");
-    //   } else {
-    //     setError(data.message || "Login failed. Please check your credentials.");
-    //   }
-    // } catch (err: any) {
-    //   setError(err?.error || "Something went wrong. Please try again.");
-    // } finally {
-    //   setIsLoading(false);
-    // }
+        router.push("/admin");
+      } else {
+        setError(data.message || "Login failed. Please check your credentials.");
+      }
+    } catch (err: any) {
+      setError(err?.error || "Something went wrong. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {

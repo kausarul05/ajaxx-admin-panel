@@ -25,7 +25,7 @@ export default function AdminAuthWrapper({ children }: { children: React.ReactNo
         try {
           const user = JSON.parse(userData);
           // Adjust this condition based on how you identify admin users
-          if (user?.is_admin || user === true || user.role === "admin" || user.is_staff) {
+          if (user?.is_staff || user === true || user.role === "admin" || user.is_staff) {
             setStatus("authenticated");
           } else {
             // Not admin, redirect to home or unauthorized page

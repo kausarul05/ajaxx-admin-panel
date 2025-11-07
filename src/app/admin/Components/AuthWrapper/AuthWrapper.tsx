@@ -17,41 +17,41 @@ export default function AuthWrapper({ children }: { children: React.ReactNode })
     }
 
     // Public paths that don't require authentication
-    // const publicPaths = ["/", "/login", "/register", "/forgot-password"];
+    const publicPaths = ["/", "/login", "/register", "/forgot-password"];
     
-    // // Admin paths that require admin authentication
-    // const adminPaths = ["/admin"];
+    // Admin paths that require admin authentication
+    const adminPaths = ["/admin"];
 
-    // if (!authToken) {
-    //   // If no token and trying to access protected route, redirect to login
-    //   if (!publicPaths.some(path => pathname.startsWith(path))) {
-    //     router.replace("/login");
-    //   } else {
-    //     setStatus("unauthenticated");
-    //   }
-    // } else {
-    //   // If has token and on public page, redirect to appropriate page
-    //   if (pathname === "/login" || pathname === "/register") {
-    //     // Check if user is admin and redirect accordingly
-    //     const userData = localStorage.getItem("userData");
-    //     if (userData) {
-    //       try {
-    //         const user = JSON.parse(userData);
-    //         if (user.is_admin === true || user.role === "admin") {
-    //           router.replace("/admin");
-    //         } else {
-    //           router.replace("/login");
-    //         }
-    //       } catch {
-    //         router.replace("/login");
-    //       }
-    //     } else {
-    //       router.replace("/login");
-    //     }
-    //   } else {
-    //     setStatus("authenticated");
-    //   }
-    // }
+    if (!authToken) {
+      // If no token and trying to access protected route, redirect to login
+      if (!publicPaths.some(path => pathname.startsWith(path))) {
+        router.replace("/login");
+      } else {
+        setStatus("unauthenticated");
+      }
+    } else {
+      // If has token and on public page, redirect to appropriate page
+      if (pathname === "/login" || pathname === "/register") {
+        // Check if user is admin and redirect accordingly
+        const userData = localStorage.getItem("userData");
+        if (userData) {
+          try {
+            const user = JSON.parse(userData);
+            if (user.is_staff === true || user.role === "admin") {
+              router.replace("/admin");
+            } else {
+              router.replace("/login");
+            }
+          } catch {
+            router.replace("/login");
+          }
+        } else {
+          router.replace("/login");
+        }
+      } else {
+        setStatus("authenticated");
+      }
+    }
   }, [router, pathname]);
 
   // if (status === "checking") {

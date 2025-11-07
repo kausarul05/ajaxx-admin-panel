@@ -1,274 +1,75 @@
 'use client'
 
 import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import userImage from "@/../public/images/profile.jpg"
 import Image from 'next/image';
+import { apiRequest } from '@/app/lib/api';
+
+interface User {
+    id: number;
+    Fullname: string;
+    email: string;
+    date_joined: string;
+}
+
+interface ApiResponse {
+    total: number;
+    page: number;
+    page_size: number;
+    total_pages: number;
+    results: User[];
+}
 
 export default function UserManagement() {
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterSubscription] = useState('all');
+    const [users, setUsers] = useState<User[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [totalItems, setTotalItems] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
     const itemsPerPage = 10;
 
-    const users = [
-        {
-            id: 1,
-            name: 'Savannah Nguyen',
-            email: 'demo59@gmail.com',
-            registrationDate: 'January 20, 2025',
-            subscription: 'Basic Protection',
-            image : userImage
-        },
-        {
-            id: 2,
-            name: 'Annette Black',
-            email: 'demo59@gmail.com',
-            registrationDate: 'February 15, 2025',
-            subscription: 'Silver Protection',
-            image : userImage
-        },
-        {
-            id: 3,
-            name: 'Cody Fisher',
-            email: 'demo59@gmail.com',
-            registrationDate: 'March 10, 2025',
-            subscription: 'Gold Protection',
-            image : userImage
-        },
-        {
-            id: 4,
-            name: 'Brooklyn Simmons',
-            email: 'demo59@gmail.com',
-            registrationDate: 'April 09, 2025',
-            subscription: 'Basic Protection',
-            image : userImage
-        },
-        {
-            id: 5,
-            name: 'Ralph Edwards',
-            email: 'demo59@gmail.com',
-            registrationDate: 'May 12, 2025',
-            subscription: 'Silver Protection',
-            image : userImage
-        },
-        {
-            id: 6,
-            name: 'Courtney Henry',
-            email: 'demo59@gmail.com',
-            registrationDate: 'June 12, 2025',
-            subscription: 'Gold Protection',
-            image : userImage
-        },
-        {
-            id: 7,
-            name: 'Bessie Cooper',
-            email: 'demo59@gmail.com',
-            registrationDate: 'April 12, 2025',
-            subscription: 'Basic Protection',
-            image : userImage
-        },
-        {
-            id: 8,
-            name: 'Esther Howard',
-            email: 'demo59@gmail.com',
-            registrationDate: 'April 12, 2025',
-            subscription: 'Silver Protection',
-            image : userImage
-        },
-        {
-            id: 9,
-            name: 'Eleanor Pena',
-            email: 'demo59@gmail.com',
-            registrationDate: 'April 12, 2025',
-            subscription: 'Gold Protection',
-            image : userImage
-        },
-        {
-            id: 10,
-            name: 'Cameron Williamson',
-            email: 'demo59@gmail.com',
-            registrationDate: 'April 12, 2025',
-            subscription: 'Silver Protection',
-            image : userImage
-        },
-        {
-            id: 11,
-            name: 'Guy Hawkins',
-            email: 'demo59@gmail.com',
-            registrationDate: 'April 12, 2025',
-            subscription: 'Basic Protection',
-            image : userImage
-        },
-        {
-            id: 12,
-            name: 'Jenny Wilson',
-            email: 'demo59@gmail.com',
-            registrationDate: 'June 22, 2025',
-            subscription: 'Gold Protection',
-            image : userImage
-        },
-        {
-            id: 13,
-            name: 'Jacob Jones',
-            email: 'demo59@gmail.com',
-            registrationDate: 'July 04, 2025',
-            subscription: 'Silver Protection',
-            image : userImage
-        },
-        {
-            id: 14,
-            name: 'Devon Lane',
-            email: 'demo59@gmail.com',
-            registrationDate: 'July 20, 2025',
-            subscription: 'Basic Protection',
-            image : userImage
-        },
-        {
-            id: 15,
-            name: 'Kristin Watson',
-            email: 'demo59@gmail.com',
-            registrationDate: 'August 01, 2025',
-            subscription: 'Gold Protection',
-            image : userImage
-        },
-        {
-            id: 16,
-            name: 'Floyd Miles',
-            email: 'demo59@gmail.com',
-            registrationDate: 'August 11, 2025',
-            subscription: 'Silver Protection',
-            image : userImage
-        },
-        {
-            id: 17,
-            name: 'Wade Warren',
-            email: 'demo59@gmail.com',
-            registrationDate: 'August 22, 2025',
-            subscription: 'Basic Protection',
-            image : userImage
-        },
-        {
-            id: 18,
-            name: 'Arlene McCoy',
-            email: 'demo59@gmail.com',
-            registrationDate: 'September 03, 2025',
-            subscription: 'Gold Protection',
-            image : userImage
-        },
-        {
-            id: 19,
-            name: 'Darlene Robertson',
-            email: 'demo59@gmail.com',
-            registrationDate: 'September 10, 2025',
-            subscription: 'Silver Protection',
-            image : userImage
-        },
-        {
-            id: 20,
-            name: 'Theresa Webb',
-            email: 'demo59@gmail.com',
-            registrationDate: 'September 22, 2025',
-            subscription: 'Basic Protection',
-            image : userImage
-        },
-        {
-            id: 21,
-            name: 'Leslie Alexander',
-            email: 'demo59@gmail.com',
-            registrationDate: 'October 01, 2025',
-            subscription: 'Gold Protection',
-            image : userImage
-        },
-        {
-            id: 22,
-            name: 'Marvin McKinney',
-            email: 'demo59@gmail.com',
-            registrationDate: 'October 10, 2025',
-            subscription: 'Silver Protection',
-            image : userImage
-        },
-        {
-            id: 23,
-            name: 'Jerome Bell',
-            email: 'demo59@gmail.com',
-            registrationDate: 'October 18, 2025',
-            subscription: 'Basic Protection',
-            image : userImage
-        },
-        {
-            id: 24,
-            name: 'Albert Flores',
-            email: 'demo59@gmail.com',
-            registrationDate: 'October 25, 2025',
-            subscription: 'Gold Protection',
-            image : userImage
-        },
-        {
-            id: 25,
-            name: 'Eleanor Rigby',
-            email: 'demo59@gmail.com',
-            registrationDate: 'November 03, 2025',
-            subscription: 'Silver Protection',
-            image : userImage
-        },
-        {
-            id: 26,
-            name: 'Phillip Nguyen',
-            email: 'demo59@gmail.com',
-            registrationDate: 'November 10, 2025',
-            subscription: 'Basic Protection',
-            image : userImage
-        },
-        {
-            id: 27,
-            name: 'Angela Gray',
-            email: 'demo59@gmail.com',
-            registrationDate: 'November 20, 2025',
-            subscription: 'Gold Protection',
-            image : userImage
-        },
-        {
-            id: 28,
-            name: 'Martha Craig',
-            email: 'demo59@gmail.com',
-            registrationDate: 'December 02, 2025',
-            subscription: 'Silver Protection',
-            image : userImage
-        },
-        {
-            id: 29,
-            name: 'Harold King',
-            email: 'demo59@gmail.com',
-            registrationDate: 'December 10, 2025',
-            subscription: 'Basic Protection',
-            image : userImage
-        },
-        {
-            id: 30,
-            name: 'Kathryn Murphy',
-            email: 'demo59@gmail.com',
-            registrationDate: 'December 20, 2025',
-            subscription: 'Gold Protection',
-            image : userImage
+
+    // Fetch users from API
+    const fetchUsers = async (page: number) => {
+        try {
+            setLoading(true);
+            const data: ApiResponse = await apiRequest("GET", `/accounts/user_all/?page=${page}&page_size=${itemsPerPage}`, null, {
+                headers : {
+                    Authorization : `Bearer ${localStorage.getItem("authToken")}`
+                }
+            });
+
+            setUsers(data.results);
+            setTotalItems(data.total);
+            setTotalPages(data.total_pages);
+            setCurrentPage(data.page);
+        } catch (error) {
+            console.error('Failed to fetch users:', error);
+            setUsers([]);
+        } finally {
+            setLoading(false);
         }
-    ];
-    ;
+    };
+
+    useEffect(() => {
+        fetchUsers(currentPage);
+    }, [currentPage]);
 
     // Filter users based on search term and subscription filter
     const filteredUsers = useMemo(() => {
         return users.filter(user => {
-            const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                user.email.toLowerCase().includes(searchTerm.toLowerCase());
-            const matchesSubscription = filterSubscription === 'all' ||
-                user.subscription === filterSubscription;
+            const matchesSearch =
+                (user.Fullname?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    user.email.toLowerCase().includes(searchTerm.toLowerCase()));
+            const matchesSubscription = filterSubscription === 'all';
             return matchesSearch && matchesSubscription;
         });
     }, [users, searchTerm, filterSubscription]);
 
-    // Calculate pagination values
-    const totalItems = filteredUsers.length;
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    // Calculate pagination values for current filtered results
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const currentUsers = filteredUsers.slice(startIndex, endIndex);
@@ -276,12 +77,13 @@ export default function UserManagement() {
     // Reset to first page when filters change
     React.useEffect(() => {
         setCurrentPage(1);
-    }, [searchTerm, filterSubscription, users]);
+    }, [searchTerm, filterSubscription]);
 
     // Handle page change
     const handlePageChange = (page: number) => {
         if (page >= 1 && page <= totalPages) {
             setCurrentPage(page);
+            // The useEffect will trigger the API call with the new page
         }
     };
 
@@ -315,7 +117,20 @@ export default function UserManagement() {
         // Add your remove logic here
     };
 
-    // const subscriptionTypes = ['all', 'Basic Protection', 'Silver Protection', 'Gold Protection'];
+    // Format date to match your design
+    const formatDate = (dateString: string) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    };
+
+    // Get display name (use Fullname if available, otherwise use email)
+    const getDisplayName = (user: User) => {
+        return user.Fullname || user.email.split('@')[0] || 'Unknown User';
+    };
 
     return (
         <div className="min-h-screen  p-6">
@@ -334,8 +149,6 @@ export default function UserManagement() {
                         <Search size={18} className='absolute right-4 top-3 cursor-pointer' />
                     </div>
                 </div>
-
-
 
                 {/* Table Container */}
                 <div className="rounded-lg shadow-sm border border-[#007ED6] overflow-hidden">
@@ -365,54 +178,71 @@ export default function UserManagement() {
                                 </tr>
                             </thead>
                             <tbody className="">
-                                {currentUsers.map((user) => (
-                                    <tr key={user.id} className="">
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
-                                            {user.id}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
-                                            <div className='flex items-center gap-3'>
-                                                <Image
-                                                    src={user?.image}
-                                                    alt={user?.name}
-                                                    width={120}
-                                                    height={60}
-                                                    className='w-10 h-10 object-fill rounded'
-                                                />
-                                                {user.name}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[#F9FAFB]">
-                                            {user.email}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
-                                            {user.registrationDate}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <span
-                                                className={`inline-flex px-2 py-1 text-xs font-semibold text-[#F9FAFB] `}
-                                            >
-                                                {user.subscription}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                            <div className="flex space-x-3">
-                                                <button
-                                                    onClick={() => handleBlock(user.id)}
-                                                    className="bg-[#0ABF9D4D] px-4 py-1 text-[#0ABF9D] rounded cursor-pointer font-medium transition-colors"
-                                                >
-                                                    Block
-                                                </button>
-                                                <button
-                                                    onClick={() => handleRemove(user.id)}
-                                                    className="bg-[#551214] px-4 py-1 text-[#FE4D4F] rounded cursor-pointer font-medium transition-colors"
-                                                >
-                                                    Remove
-                                                </button>
-                                            </div>
+                                {loading ? (
+                                    // Loading state
+                                    <tr>
+                                        <td colSpan={6} className="px-6 py-4 text-center text-white">
+                                            Loading users...
                                         </td>
                                     </tr>
-                                ))}
+                                ) : currentUsers.length === 0 ? (
+                                    // No users state
+                                    <tr>
+                                        <td colSpan={6} className="px-6 py-4 text-center text-white">
+                                            No users found
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    // Users data
+                                    currentUsers.map((user, index) => (
+                                        <tr key={user.id} className="">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                                                {startIndex + index + 1}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
+                                                <div className='flex items-center gap-3'>
+                                                    <Image
+                                                        src={userImage}
+                                                        alt={getDisplayName(user)}
+                                                        width={120}
+                                                        height={60}
+                                                        className='w-10 h-10 object-fill rounded'
+                                                    />
+                                                    {getDisplayName(user)}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-[#F9FAFB]">
+                                                {user.email}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                                                {formatDate(user.date_joined)}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <span
+                                                    className={`inline-flex px-2 py-1 text-xs font-semibold text-[#F9FAFB]`}
+                                                >
+                                                    Basic Protection
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <div className="flex space-x-3">
+                                                    <button
+                                                        onClick={() => handleBlock(user.id)}
+                                                        className="bg-[#0ABF9D4D] px-4 py-1 text-[#0ABF9D] rounded cursor-pointer font-medium transition-colors"
+                                                    >
+                                                        Block
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleRemove(user.id)}
+                                                        className="bg-[#551214] px-4 py-1 text-[#FE4D4F] rounded cursor-pointer font-medium transition-colors"
+                                                    >
+                                                        Remove
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
                             </tbody>
                         </table>
                     </div>
@@ -439,13 +269,13 @@ export default function UserManagement() {
                                 {/* Previous Button */}
                                 <button
                                     onClick={() => handlePageChange(currentPage - 1)}
-                                    disabled={currentPage === 1}
-                                    className={`w-10 h-10 font-bold text-sm rounded transition-colors cursor-pointer ${currentPage === 1
+                                    disabled={currentPage === 1 || loading}
+                                    className={`w-10 h-10 font-bold text-sm rounded transition-colors cursor-pointer ${currentPage === 1 || loading
                                         ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                         : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                         }`}
                                 >
-                                    <ChevronLeft size={24} color='black' className='font-bold mx-auto'/>
+                                    <ChevronLeft size={24} color='black' className='font-bold mx-auto' />
                                 </button>
 
                                 {/* Page Numbers */}
@@ -453,10 +283,11 @@ export default function UserManagement() {
                                     <button
                                         key={page}
                                         onClick={() => handlePageChange(page)}
+                                        disabled={loading}
                                         className={`w-10 h-10 font-bold text-sm rounded transition-colors cursor-pointer ${currentPage === page
                                             ? 'bg-[#245FE7] text-white'
                                             : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                            }`}
+                                            } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                                     >
                                         {page}
                                     </button>
@@ -465,13 +296,13 @@ export default function UserManagement() {
                                 {/* Next Button */}
                                 <button
                                     onClick={() => handlePageChange(currentPage + 1)}
-                                    disabled={currentPage === totalPages || totalPages === 0}
-                                    className={`w-10 h-10 font-bold cursor-pointer text-sm rounded transition-colors ${currentPage === totalPages || totalPages === 0
+                                    disabled={currentPage === totalPages || totalPages === 0 || loading}
+                                    className={`w-10 h-10 font-bold cursor-pointer text-sm rounded transition-colors ${currentPage === totalPages || totalPages === 0 || loading
                                         ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                         : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                         }`}
                                 >
-                                    <ChevronRight size={24} color='black' className='font-bold mx-auto'/>
+                                    <ChevronRight size={24} color='black' className='font-bold mx-auto' />
                                 </button>
                             </div>
                         </div>
