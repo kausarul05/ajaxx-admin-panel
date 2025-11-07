@@ -21,8 +21,8 @@ export default function Sidebar() {
     const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
 
     const menuItems = [
-        { href: "/", icon: LayoutDashboard, label: "Dashboards" },
-        { href: "/user-management", icon: History, label: "User Management" },
+        { href: "/admin", icon: LayoutDashboard, label: "Dashboards" },
+        { href: "/admin/user-management", icon: History, label: "User Management" },
         {
             href: "#",
             icon: Star,
@@ -33,9 +33,9 @@ export default function Sidebar() {
                 { href: "/subscriptions/subscribers", label: "Subscribers" }
             ]
         },
-        { href: "/products-management", icon: User, label: "Products Management" },
-        { href: "/review-management", icon: User, label: "Review Management" },
-        { href: "/settings", icon: Lock, label: "Settings" },
+        { href: "/admin/products-management", icon: User, label: "Products Management" },
+        { href: "/admin/review-management", icon: User, label: "Review Management" },
+        { href: "/admin/settings", icon: Lock, label: "Settings" },
     ];
 
     // Auto-open menu if current page is a nested item

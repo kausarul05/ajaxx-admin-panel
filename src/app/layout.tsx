@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Sidebar from "./Components/Sidebar/Sidebar";
-import Image from "next/image";
-import profile from "@/../public/images/profile.jpg"
-import { ChevronsLeft } from "lucide-react";
+import AuthWrapper from "./admin/Components/AuthWrapper/AuthWrapper";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -28,27 +25,8 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
-            <body
-                className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-            >
-                <div className="flex">
-                    <div>
-                        <Sidebar />
-                    </div>
-                    <div className="w-full pl-[385px] bg-[#0A2131]">
-                        <div className="flex justify-between bg-[#0D314B] p-6">
-                            <h2 className="font-semibold text-[20px] flex items-center gap-3 cursor-pointer text-white"><ChevronsLeft size={28} className="font-bold"/> Overview</h2>
-                            <Image
-                                src={profile}
-                                alt="abc"
-                                width={800}
-                                height={400}
-                                className="w-10 h-10 object-fill rounded-full cursor-pointer"
-                            />
-                        </div>
-                        {children}
-                    </div>
-                </div>
+            <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+                <AuthWrapper>{children}</AuthWrapper>
             </body>
         </html>
     );
