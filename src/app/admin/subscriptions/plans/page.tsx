@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { CircleCheck, CircleX, Pencil, Plus, Trash, X } from "lucide-react";
 import { apiRequest } from '@/app/lib/api';
+import { toast } from "react-toastify";
 
 interface Feature {
     id: number;
@@ -106,11 +107,11 @@ export default function PlansManagement() {
             });
             
             setSubscriptions(prev => prev.filter(sub => sub.id !== subscriptionId));
-            alert('Subscription deleted successfully');
+            toast.success('Subscription deleted successfully');
             
         } catch (error: any) {
             console.error('Failed to delete subscription:', error);
-            alert(error?.error || 'Failed to delete subscription');
+            toast.error(error?.error || 'Failed to delete subscription');
         }
     };
 
@@ -157,7 +158,7 @@ export default function PlansManagement() {
     // Handle create subscription
     const handleCreateSubscription = async () => {
         if (!formData.title || !formData.Description || !formData.price) {
-            alert("Please fill in all required fields");
+            toast.error("Please fill in all required fields");
             return;
         }
 
@@ -182,16 +183,16 @@ export default function PlansManagement() {
             });
 
             if (response.success) {
-                alert('Subscription created successfully');
+                toast.success('Subscription created successfully');
                 setShowCreateModal(false);
                 resetForm();
                 fetchSubscriptions(); // Refresh the list
             } else {
-                alert(response.message || 'Failed to create subscription');
+                toast.error(response.message || 'Failed to create subscription');
             }
         } catch (error: any) {
             console.error('Failed to create subscription:', error);
-            alert(error?.error || 'Failed to create subscription');
+            toast.error(error?.error || 'Failed to create subscription');
         } finally {
             setCreateLoading(false);
         }
@@ -200,7 +201,7 @@ export default function PlansManagement() {
     // Handle update subscription
     const handleUpdateSubscription = async () => {
         if (!selectedPlan || !formData.title || !formData.Description || !formData.price) {
-            alert("Please fill in all required fields");
+            toast.error("Please fill in all required fields");
             return;
         }
 
@@ -225,15 +226,15 @@ export default function PlansManagement() {
             });
 
             if (response.success) {
-                alert('Subscription updated successfully');
+                toast.success('Subscription updated successfully');
                 setShowEditModal(false);
                 fetchSubscriptions(); // Refresh the list
             } else {
-                alert(response.message || 'Failed to update subscription');
+                toast.error(response.message || 'Failed to update subscription');
             }
         } catch (error: any) {
             console.error('Failed to update subscription:', error);
-            alert(error?.error || 'Failed to update subscription');
+            toast.error(error?.error || 'Failed to update subscription');
         } finally {
             setEditLoading(false);
         }

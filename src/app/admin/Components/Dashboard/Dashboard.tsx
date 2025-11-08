@@ -2,9 +2,10 @@
 
 import { Users } from 'lucide-react';
 import Image from 'next/image';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, TooltipProps } from 'recharts';
 import userImage from "@/../public/images/profile.jpg"
+import { apiRequest } from '@/app/lib/api';
 
 // Define types
 interface StatItem {
@@ -36,11 +37,61 @@ interface CustomTooltipProps extends TooltipProps<number, string> {
   label?: string;
 }
 
+interface ApiResponse<T> {
+  data?: T;
+  error?: string;
+}
+
+interface TotalEarningsResponse {
+  success: boolean;
+  message: string;
+  data: {
+    total: number;
+  };
+}
+
+interface SubscribersResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: any[];
+}
+
+interface EarningsOverviewResponse {
+  success: boolean;
+  message: string;
+  data: {
+    earnings: Array<{
+      month: string;
+      total: number;
+    }>;
+    growth_percentage: number;
+    trend: string;
+  };
+}
 export default function Dashboard() {
+  const [totalEarnings, setTotalEarnings] = useState<string>('0.00');
+  const [subscribersCount, setSubscribersCount] = useState<string>('0');
+  const [chartData, setChartData] = useState<ChartData[]>([]);
+  const [growthPercentage, setGrowthPercentage] = useState<number>(0);
+  const [loading, setLoading] = useState(true);
+
   const stats: StatItem[] = [
-    { title: 'Total User', value: '25,648', icon: <Users size={24} color='#0ABF9D' className='font-bold' /> },
-    { title: 'Subscribers', value: '58,320', icon: <Users size={24} color='#0ABF9D' className='font-bold' /> },
-    { title: 'Total Earning', value: '$52,567.53', icon: <Users size={24} color='#0ABF9D' className='font-bold' /> },
+    { 
+      title: 'Total User', 
+      value: `$${totalEarnings}`, 
+      icon: <Users size={24} color='#0ABF9D' className='font-bold' /> 
+    },
+    { 
+      title: 'Subscribers', 
+      value: `$${subscribersCount}`, 
+      icon: <Users size={24} color='#0ABF9D' className='font-bold' /> 
+    },
+    { 
+      title: 'Total Earning', 
+      value: `$${totalEarnings}`, 
+      icon: <Users size={24} color='#0ABF9D' className='font-bold' /> 
+    },
   ];
 
   const users: User[] = [
@@ -78,21 +129,74 @@ export default function Dashboard() {
     },
   ];
 
-  // Chart data
-  const chartData: ChartData[] = [
-    { month: 'Jan', revenue: 18500 },
-    { month: 'Feb', revenue: 21200 },
-    { month: 'Mar', revenue: 19800 },
-    { month: 'Apr', revenue: 24500 },
-    { month: 'May', revenue: 23100 },
-    { month: 'Jun', revenue: 26700 },
-    { month: 'Jul', revenue: 25400 },
-    { month: 'Aug', revenue: 28900 },
-    { month: 'Sep', revenue: 27600 },
-    { month: 'Oct', revenue: 31200 },
-    { month: 'Nov', revenue: 29800 },
-    { month: 'Dec', revenue: 32500 },
-  ];
+  // Fetch dashboard data
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+
+      // Fetch total earnings
+      const earningsResponse = await apiRequest(
+        "GET", 
+        "/payment/payments/total-earnings/", 
+        null,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`
+          }
+        }
+      );
+
+      if (earningsResponse.data) {
+        setTotalEarnings(earningsResponse.data.data.total.toFixed(2));
+      }
+
+      // Fetch subscribers count
+      const subscribersResponse = await apiRequest(
+        "GET", 
+        "/payment/payments/", 
+        null,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`
+          }
+        }
+      );
+
+      if (subscribersResponse.data) {
+        setSubscribersCount(subscribersResponse.data.count.toString());
+      }
+
+      // Fetch earnings overview
+      const earningsOverviewResponse = await apiRequest(
+        "GET", 
+        "/payment/payments/earnings-overview/", 
+        null,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`
+          }
+        }
+      );
+
+      if (earningsOverviewResponse.data) {
+        const earningsData = earningsOverviewResponse.data.data;
+        setChartData(earningsData.earnings.map(item => ({
+          month: item.month,
+          revenue: item.total
+        })));
+        setGrowthPercentage(earningsData.growth_percentage);
+      }
+
+    } catch (error) {
+      console.error("Error fetching dashboard data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
 
   // Custom tooltip
   const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label }) => {
@@ -101,13 +205,21 @@ export default function Dashboard() {
         <div className="bg-white p-3 shadow-lg rounded-lg border">
           <p className="font-medium text-gray-900">{label}</p>
           <p className="text-sm text-blue-600">
-            Revenue: <span className="font-medium">${payload[0].value.toLocaleString()}</span>
+            Revenue: <span className="font-medium">${payload[0].value?.toLocaleString()}</span>
           </p>
         </div>
       );
     }
     return null;
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0A2131] p-6">
+        <div className="text-white text-center">Loading dashboard data...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0A2131] p-6">
@@ -137,8 +249,12 @@ export default function Dashboard() {
                 <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
                 <span className="text-sm text-white">Revenue</span>
               </div>
-              <div className="bg-green-50 text-green-700 px-2 py-1 rounded text-sm font-medium">
-                +4% Monthly
+              <div className={`px-2 py-1 rounded text-sm font-medium ${
+                growthPercentage >= 0 
+                  ? 'bg-green-50 text-green-700' 
+                  : 'bg-red-50 text-red-700'
+              }`}>
+                {growthPercentage >= 0 ? '+' : ''}{growthPercentage}% Monthly
               </div>
             </div>
           </div>
