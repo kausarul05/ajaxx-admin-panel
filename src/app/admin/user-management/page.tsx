@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
 import userImage from "@/../public/images/profile.jpg"
 import Image from 'next/image';
 import { apiRequest } from '@/app/lib/api';
+import { toast } from 'react-toastify';
 
 interface User {
     id: number;
@@ -92,11 +93,11 @@ export default function UserManagement() {
             );
             
             // Show success message
-            alert(response.detail || 'User blocked successfully');
+            toast.success(response.detail || 'User blocked successfully');
             
         } catch (error: any) {
             console.error('Failed to block user:', error);
-            alert(error?.error || 'Failed to block user');
+            toast.error(error?.error || 'Failed to block user');
         } finally {
             setActionLoading(null);
         }
@@ -122,11 +123,11 @@ export default function UserManagement() {
             );
             
             // Show success message
-            alert(response.detail || 'User unblocked successfully');
+            toast.success(response.detail || 'User unblocked successfully');
             
         } catch (error: any) {
             console.error('Failed to unblock user:', error);
-            alert(error?.error || 'Failed to unblock user');
+            toast.error(error?.error || 'Failed to unblock user');
         } finally {
             setActionLoading(null);
         }
@@ -154,7 +155,7 @@ export default function UserManagement() {
             setTotalItems(prev => prev - 1);
             
             // Show success message
-            alert(response.detail || 'User removed successfully');
+            toast.success(response.detail || 'User removed successfully');
             
             // If current page becomes empty, go to previous page
             if (users.length === 1 && currentPage > 1) {
@@ -163,7 +164,7 @@ export default function UserManagement() {
             
         } catch (error: any) {
             console.error('Failed to remove user:', error);
-            alert(error?.error || 'Failed to remove user');
+            toast.error(error?.error || 'Failed to remove user');
         } finally {
             setActionLoading(null);
         }

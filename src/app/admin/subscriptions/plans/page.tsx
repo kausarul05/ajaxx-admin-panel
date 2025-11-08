@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { CircleCheck, CircleX, Pencil, Plus, Trash } from "lucide-react";
+import { CircleCheck, CircleX, Pencil, Plus, Trash, X } from "lucide-react";
 import { apiRequest } from '@/app/lib/api';
 
 interface Feature {
@@ -24,12 +24,31 @@ interface ApiResponse {
     data: Subscription[];
 }
 
+interface CreateSubscriptionData {
+    title: string;
+    Description: string;
+    price: string;
+    billing_cycle: string;
+    features: { description: string }[];
+}
+
 export default function PlansManagement() {
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedPlan, setSelectedPlan] = useState<Subscription | null>(null);
+    const [createLoading, setCreateLoading] = useState(false);
+    const [editLoading, setEditLoading] = useState(false);
+
+    // Form states
+    const [formData, setFormData] = useState({
+        title: "",
+        Description: "",
+        price: "",
+        billing_cycle: "monthly",
+    });
+    const [features, setFeatures] = useState([{ description: "" }]);
 
     // Fetch subscriptions from API
     const fetchSubscriptions = async () => {
@@ -61,6 +80,16 @@ export default function PlansManagement() {
 
     const handleEdit = (subscription: Subscription) => {
         setSelectedPlan(subscription);
+        setFormData({
+            title: subscription.title,
+            Description: subscription.Description,
+            price: subscription.price,
+            billing_cycle: subscription.billing_cycle,
+        });
+        setFeatures(subscription.features.length > 0 
+            ? subscription.features.map(f => ({ description: f.description }))
+            : [{ description: "" }]
+        );
         setShowEditModal(true);
     };
 
@@ -70,16 +99,13 @@ export default function PlansManagement() {
         }
 
         try {
-            // Assuming your delete API endpoint - adjust if different
             await apiRequest("DELETE", `/payment/subscriptions/${subscriptionId}/`, null, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("authToken")}`
                 }
             });
             
-            // Remove subscription from local state immediately
             setSubscriptions(prev => prev.filter(sub => sub.id !== subscriptionId));
-            
             alert('Subscription deleted successfully');
             
         } catch (error: any) {
@@ -88,20 +114,138 @@ export default function PlansManagement() {
         }
     };
 
+    // Handle form input changes
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    // Handle feature input changes
+    const handleFeatureChange = (index: number, value: string) => {
+        const newFeatures = [...features];
+        newFeatures[index].description = value;
+        setFeatures(newFeatures);
+    };
+
+    // Add new feature field
+    const addFeature = () => {
+        setFeatures([...features, { description: "" }]);
+    };
+
+    // Remove feature field
+    const removeFeature = (index: number) => {
+        if (features.length > 1) {
+            const newFeatures = features.filter((_, i) => i !== index);
+            setFeatures(newFeatures);
+        }
+    };
+
+    // Reset form
+    const resetForm = () => {
+        setFormData({
+            title: "",
+            Description: "",
+            price: "",
+            billing_cycle: "monthly",
+        });
+        setFeatures([{ description: "" }]);
+    };
+
+    // Handle create subscription
+    const handleCreateSubscription = async () => {
+        if (!formData.title || !formData.Description || !formData.price) {
+            alert("Please fill in all required fields");
+            return;
+        }
+
+        // Filter out empty features
+        const validFeatures = features.filter(feature => feature.description.trim() !== "");
+
+        const subscriptionData: CreateSubscriptionData = {
+            title: formData.title,
+            Description: formData.Description,
+            price: formData.price,
+            billing_cycle: formData.billing_cycle,
+            features: validFeatures
+        };
+
+        try {
+            setCreateLoading(true);
+            const response = await apiRequest("POST", "/payment/subscriptions/", subscriptionData, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.success) {
+                alert('Subscription created successfully');
+                setShowCreateModal(false);
+                resetForm();
+                fetchSubscriptions(); // Refresh the list
+            } else {
+                alert(response.message || 'Failed to create subscription');
+            }
+        } catch (error: any) {
+            console.error('Failed to create subscription:', error);
+            alert(error?.error || 'Failed to create subscription');
+        } finally {
+            setCreateLoading(false);
+        }
+    };
+
+    // Handle update subscription
+    const handleUpdateSubscription = async () => {
+        if (!selectedPlan || !formData.title || !formData.Description || !formData.price) {
+            alert("Please fill in all required fields");
+            return;
+        }
+
+        // Filter out empty features
+        const validFeatures = features.filter(feature => feature.description.trim() !== "");
+
+        const subscriptionData: CreateSubscriptionData = {
+            title: formData.title,
+            Description: formData.Description,
+            price: formData.price,
+            billing_cycle: formData.billing_cycle,
+            features: validFeatures
+        };
+
+        try {
+            setEditLoading(true);
+            const response = await apiRequest("PUT", `/payment/subscriptions/${selectedPlan.id}/`, subscriptionData, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.success) {
+                alert('Subscription updated successfully');
+                setShowEditModal(false);
+                fetchSubscriptions(); // Refresh the list
+            } else {
+                alert(response.message || 'Failed to update subscription');
+            }
+        } catch (error: any) {
+            console.error('Failed to update subscription:', error);
+            alert(error?.error || 'Failed to update subscription');
+        } finally {
+            setEditLoading(false);
+        }
+    };
+
     // Map API data to your feature structure
     const getFeaturesList = (subscription: Subscription) => {
-        // You can customize this mapping based on your needs
-        const defaultFeatures = [
-        ];
-
-        // Map API features to your structure
         const apiFeatures = subscription.features.map(feature => ({
             text: feature.description,
             available: true
         }));
-
-        // Combine with default features (you can adjust this logic as needed)
-        return [...apiFeatures, ...defaultFeatures.slice(apiFeatures.length)];
+        return apiFeatures;
     };
 
     // Get display duration
@@ -120,13 +264,16 @@ export default function PlansManagement() {
     }
 
     return (
-        <div className=" bg-[#0A2131] text-white px-6 py-8">
-            <div className="bg-[#0D314B] rounded-lg p-6 h-screen">
+        <div className="bg-[#0A2131] text-white px-6 py-8">
+            <div className="bg-[#0D314B] rounded-lg p-6 min-h-screen">
                 {/* Header */}
                 <div className="flex justify-between items-center mb-8 border-b border-[#1b3b56] pb-4">
                     <h1 className="text-lg font-semibold">Plans Management</h1>
                     <button
-                        onClick={() => setShowCreateModal(true)}
+                        onClick={() => {
+                            resetForm();
+                            setShowCreateModal(true);
+                        }}
                         className="flex items-center cursor-pointer gap-2 bg-[#007ED6] hover:bg-[#006bb3] text-white px-4 py-2 rounded-lg font-medium"
                     >
                         <Plus size={18} /> Create New Subscriptions
@@ -136,7 +283,7 @@ export default function PlansManagement() {
                 {/* Plans */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                     {subscriptions.map((subscription) => {
-                        const features = getFeaturesList(subscription);
+                        const featuresList = getFeaturesList(subscription);
                         return (
                             <div
                                 key={subscription.id}
@@ -155,13 +302,9 @@ export default function PlansManagement() {
                                 </p>
 
                                 <ul className="space-y-2 text-sm mb-4">
-                                    {features.map((feature, idx) => (
+                                    {featuresList.map((feature, idx) => (
                                         <li key={idx} className="flex items-center gap-2">
-                                            {feature.available ? (
-                                                <CircleCheck size={14} className="text-[#007ED6]" />
-                                            ) : (
-                                                <CircleX size={14} className="text-[#EB4335]" />
-                                            )}
+                                            <CircleCheck size={14} className="text-[#007ED6]" />
                                             {feature.text}
                                         </li>
                                     ))}
@@ -188,83 +331,129 @@ export default function PlansManagement() {
 
                 {/* Create Modal */}
                 {showCreateModal && (
-                    <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-50">
-                        <div className="bg-[#0e304a] border border-[#1b4b70] rounded-lg p-6 w-[90%] max-w-2xl text-white">
-                            <h2 className="text-xl font-semibold mb-6">
-                                Create Subscriptions
-                            </h2>
+                    <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-50 p-4">
+                        <div className="bg-[#0e304a] border border-[#1b4b70] rounded-lg p-6 w-full max-w-2xl text-white max-h-[90vh] overflow-y-auto">
+                            <div className="flex justify-between items-center mb-6">
+                                <h2 className="text-xl font-semibold">Create Subscription</h2>
+                                <button
+                                    onClick={() => setShowCreateModal(false)}
+                                    className="p-2 hover:bg-[#1b4b70] rounded-lg"
+                                >
+                                    <X size={20} />
+                                </button>
+                            </div>
 
                             {/* Plan Name & Price Row */}
-                            <div className="grid gap-6 mb-6">
-                                <div className="w-full">
-                                    <div className="flex w-full gap-4">
-                                        <div className="flex-1 ">
-                                            <label className="block text-sm font-medium mb-2">Plan name</label>
-                                            <input
-                                                type="text"
-                                                placeholder="Enter plan name"
-                                                className="bg-[#0A2131] border border-[#1b4b70] rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-[#007ED6] placeholder-gray-400 w-full"
-                                            />
-                                        </div>
-                                        <div className="flex-1 ">
-                                            <label className="block text-sm font-medium mb-2">Price</label>
-                                            <input
-                                                type="text"
-                                                placeholder="Enter price"
-                                                className="bg-[#0A2131] border border-[#1b4b70] rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-[#007ED6] placeholder-gray-400 w-full"
-                                            />
-                                        </div>
-                                    </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">Plan Name *</label>
+                                    <input
+                                        type="text"
+                                        name="title"
+                                        value={formData.title}
+                                        onChange={handleInputChange}
+                                        placeholder="Enter plan name"
+                                        className="bg-[#0A2131] border border-[#1b4b70] rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-[#007ED6] placeholder-gray-400 w-full"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">Price *</label>
+                                    <input
+                                        type="text"
+                                        name="price"
+                                        value={formData.price}
+                                        onChange={handleInputChange}
+                                        placeholder="Enter price"
+                                        className="bg-[#0A2131] border border-[#1b4b70] rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-[#007ED6] placeholder-gray-400 w-full"
+                                    />
                                 </div>
                             </div>
 
-                            {/* Limit & Visibility Type Row */}
-                            <div className="mb-6">
-                                <div>
-                                    <div className="flex w-full gap-4">
-                                        <div className="flex-1 ">
-                                            <label className="block text-sm font-medium mb-2">Limit</label>
-                                            <input
-                                                type="text"
-                                                placeholder="Enter Limit"
-                                                className="bg-[#0A2131] border border-[#1b4b70] rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-[#007ED6] placeholder-gray-400 w-full"
-                                            />
-                                        </div>
-                                        <div className="flex-1 ">
-                                            <label className="block text-sm font-medium mb-2">Visibility Type</label>
-                                            <input
-                                                type="text"
-                                                placeholder="Enter Visibility Type"
-                                                className="bg-[#0A2131] border border-[#1b4b70] rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-[#007ED6] placeholder-gray-400 w-full"
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
+                            {/* Billing Cycle */}
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium mb-2">Billing Cycle *</label>
+                                <select
+                                    name="billing_cycle"
+                                    value={formData.billing_cycle}
+                                    onChange={handleInputChange}
+                                    className="bg-[#0A2131] border border-[#1b4b70] rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-[#007ED6] w-full"
+                                >
+                                    <option value="monthly">Monthly</option>
+                                    <option value="yearly">Yearly</option>
+                                </select>
                             </div>
 
                             {/* Description */}
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium mb-2">Description</label>
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium mb-2">Description *</label>
                                 <textarea
-                                    placeholder="Type here..."
-                                    rows={4}
+                                    name="Description"
+                                    value={formData.Description}
+                                    onChange={handleInputChange}
+                                    placeholder="Type description here..."
+                                    rows={3}
                                     className="w-full bg-[#0A2131] border border-[#1b4b70] rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-[#007ED6] placeholder-gray-400 resize-none"
                                 />
+                            </div>
+
+                            {/* Features */}
+                            <div className="mb-6">
+                                <div className="flex justify-between items-center mb-2">
+                                    <label className="block text-sm font-medium">Features</label>
+                                    <button
+                                        type="button"
+                                        onClick={addFeature}
+                                        className="text-sm text-[#007ED6] hover:text-[#006bb3] flex items-center gap-1"
+                                    >
+                                        <Plus size={14} /> Add Feature
+                                    </button>
+                                </div>
+                                <div className="space-y-2">
+                                    {features.map((feature, index) => (
+                                        <div key={index} className="flex gap-2">
+                                            <input
+                                                type="text"
+                                                value={feature.description}
+                                                onChange={(e) => handleFeatureChange(index, e.target.value)}
+                                                placeholder={`Feature ${index + 1}`}
+                                                className="flex-1 bg-[#0A2131] border border-[#1b4b70] rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-[#007ED6] placeholder-gray-400"
+                                            />
+                                            {features.length > 1 && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeFeature(index)}
+                                                    className="p-2 text-[#EB4335] hover:bg-[#1b4b70] rounded-lg"
+                                                >
+                                                    <X size={16} />
+                                                </button>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
 
                             {/* Buttons */}
                             <div className="flex justify-end gap-4 pt-6 border-t border-[#1b4b70]">
                                 <button
                                     onClick={() => setShowCreateModal(false)}
-                                    className="px-8 py-3 bg-transparent border cursor-pointer border-gray-500 hover:bg-gray-500/20 text-sm rounded-lg font-medium transition-colors"
+                                    disabled={createLoading}
+                                    className="px-8 py-3 bg-transparent border cursor-pointer border-gray-500 hover:bg-gray-500/20 text-sm rounded-lg font-medium transition-colors disabled:opacity-50"
                                 >
                                     Cancel
                                 </button>
                                 <button
-                                    onClick={() => setShowCreateModal(false)}
-                                    className="px-8 py-3 bg-[#007ED6] cursor-pointer hover:bg-[#006bb3] rounded-lg font-semibold text-sm transition-colors"
+                                    onClick={handleCreateSubscription}
+                                    disabled={createLoading}
+                                    className="px-8 py-3 bg-[#007ED6] cursor-pointer hover:bg-[#006bb3] rounded-lg font-semibold text-sm transition-colors disabled:opacity-50 flex items-center gap-2"
                                 >
-                                    Confirm Update
+                                    {createLoading ? (
+                                        <>
+                                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                            Creating...
+                                        </>
+                                    ) : (
+                                        'Create Subscription'
+                                    )}
                                 </button>
                             </div>
                         </div>
@@ -273,86 +462,129 @@ export default function PlansManagement() {
 
                 {/* Edit Modal */}
                 {showEditModal && selectedPlan && (
-                    <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-50">
-                        <div className="bg-[#0e304a] border border-[#1b4b70] rounded-lg p-6 w-[90%] max-w-2xl text-white">
-                            <h2 className="text-xl font-semibold mb-6">
-                                Edit Subscriptions
-                            </h2>
+                    <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-50 p-4">
+                        <div className="bg-[#0e304a] border border-[#1b4b70] rounded-lg p-6 w-full max-w-2xl text-white max-h-[90vh] overflow-y-auto">
+                            <div className="flex justify-between items-center mb-6">
+                                <h2 className="text-xl font-semibold">Edit Subscription</h2>
+                                <button
+                                    onClick={() => setShowEditModal(false)}
+                                    className="p-2 hover:bg-[#1b4b70] rounded-lg"
+                                >
+                                    <X size={20} />
+                                </button>
+                            </div>
 
                             {/* Plan Name & Price Row */}
-                            <div className="grid gap-6 mb-6">
-                                <div className="w-full">
-                                    <div className="flex w-full gap-4">
-                                        <div className="flex-1 ">
-                                            <label className="block text-sm font-medium mb-2">Plan name</label>
-                                            <input
-                                                type="text"
-                                                placeholder="Enter plan name"
-                                                defaultValue={selectedPlan.title}
-                                                className="bg-[#0A2131] border border-[#1b4b70] rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-[#007ED6] placeholder-gray-400 w-full"
-                                            />
-                                        </div>
-                                        <div className="flex-1 ">
-                                            <label className="block text-sm font-medium mb-2">Price</label>
-                                            <input
-                                                type="text"
-                                                placeholder="Enter price"
-                                                defaultValue={selectedPlan.price}
-                                                className="bg-[#0A2131] border border-[#1b4b70] rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-[#007ED6] placeholder-gray-400 w-full"
-                                            />
-                                        </div>
-                                    </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">Plan Name *</label>
+                                    <input
+                                        type="text"
+                                        name="title"
+                                        value={formData.title}
+                                        onChange={handleInputChange}
+                                        placeholder="Enter plan name"
+                                        className="bg-[#0A2131] border border-[#1b4b70] rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-[#007ED6] placeholder-gray-400 w-full"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">Price *</label>
+                                    <input
+                                        type="text"
+                                        name="price"
+                                        value={formData.price}
+                                        onChange={handleInputChange}
+                                        placeholder="Enter price"
+                                        className="bg-[#0A2131] border border-[#1b4b70] rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-[#007ED6] placeholder-gray-400 w-full"
+                                    />
                                 </div>
                             </div>
 
-                            {/* Limit & Visibility Type Row */}
-                            <div className="mb-6">
-                                <div>
-                                    <div className="flex w-full gap-4">
-                                        <div className="flex-1 ">
-                                            <label className="block text-sm font-medium mb-2">Limit</label>
-                                            <input
-                                                type="text"
-                                                placeholder="Enter Limit"
-                                                className="bg-[#0A2131] border border-[#1b4b70] rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-[#007ED6] placeholder-gray-400 w-full"
-                                            />
-                                        </div>
-                                        <div className="flex-1 ">
-                                            <label className="block text-sm font-medium mb-2">Visibility Type</label>
-                                            <input
-                                                type="text"
-                                                placeholder="Enter Visibility Type"
-                                                className="bg-[#0A2131] border border-[#1b4b70] rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-[#007ED6] placeholder-gray-400 w-full"
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
+                            {/* Billing Cycle */}
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium mb-2">Billing Cycle *</label>
+                                <select
+                                    name="billing_cycle"
+                                    value={formData.billing_cycle}
+                                    onChange={handleInputChange}
+                                    className="bg-[#0A2131] border border-[#1b4b70] rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-[#007ED6] w-full"
+                                >
+                                    <option value="monthly">Monthly</option>
+                                    <option value="yearly">Yearly</option>
+                                </select>
                             </div>
 
                             {/* Description */}
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium mb-2">Description</label>
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium mb-2">Description *</label>
                                 <textarea
-                                    placeholder="Type here..."
-                                    rows={4}
-                                    defaultValue={selectedPlan.Description}
+                                    name="Description"
+                                    value={formData.Description}
+                                    onChange={handleInputChange}
+                                    placeholder="Type description here..."
+                                    rows={3}
                                     className="w-full bg-[#0A2131] border border-[#1b4b70] rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-[#007ED6] placeholder-gray-400 resize-none"
                                 />
+                            </div>
+
+                            {/* Features */}
+                            <div className="mb-6">
+                                <div className="flex justify-between items-center mb-2">
+                                    <label className="block text-sm font-medium">Features</label>
+                                    <button
+                                        type="button"
+                                        onClick={addFeature}
+                                        className="text-sm text-[#007ED6] hover:text-[#006bb3] flex items-center gap-1"
+                                    >
+                                        <Plus size={14} /> Add Feature
+                                    </button>
+                                </div>
+                                <div className="space-y-2">
+                                    {features.map((feature, index) => (
+                                        <div key={index} className="flex gap-2">
+                                            <input
+                                                type="text"
+                                                value={feature.description}
+                                                onChange={(e) => handleFeatureChange(index, e.target.value)}
+                                                placeholder={`Feature ${index + 1}`}
+                                                className="flex-1 bg-[#0A2131] border border-[#1b4b70] rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-[#007ED6] placeholder-gray-400"
+                                            />
+                                            {features.length > 1 && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeFeature(index)}
+                                                    className="p-2 text-[#EB4335] hover:bg-[#1b4b70] rounded-lg"
+                                                >
+                                                    <X size={16} />
+                                                </button>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
 
                             {/* Buttons */}
                             <div className="flex justify-end gap-4 pt-6 border-t border-[#1b4b70]">
                                 <button
                                     onClick={() => setShowEditModal(false)}
-                                    className="px-8 py-3 bg-transparent border cursor-pointer border-gray-500 hover:bg-gray-500/20 text-sm rounded-lg font-medium transition-colors"
+                                    disabled={editLoading}
+                                    className="px-8 py-3 bg-transparent border cursor-pointer border-gray-500 hover:bg-gray-500/20 text-sm rounded-lg font-medium transition-colors disabled:opacity-50"
                                 >
                                     Cancel
                                 </button>
                                 <button
-                                    onClick={() => setShowEditModal(false)}
-                                    className="px-8 py-3 bg-[#007ED6] cursor-pointer hover:bg-[#006bb3] rounded-lg font-semibold text-sm transition-colors"
+                                    onClick={handleUpdateSubscription}
+                                    disabled={editLoading}
+                                    className="px-8 py-3 bg-[#007ED6] cursor-pointer hover:bg-[#006bb3] rounded-lg font-semibold text-sm transition-colors disabled:opacity-50 flex items-center gap-2"
                                 >
-                                    Confirm Update
+                                    {editLoading ? (
+                                        <>
+                                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                            Updating...
+                                        </>
+                                    ) : (
+                                        'Update Subscription'
+                                    )}
                                 </button>
                             </div>
                         </div>
