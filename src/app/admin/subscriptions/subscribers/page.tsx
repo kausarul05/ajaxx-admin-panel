@@ -2,258 +2,137 @@
 
 import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import Image from 'next/image';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import userImage from "@/../public/images/profile.jpg"
+import { apiRequest } from '@/app/lib/api';
+
+interface User {
+    id: number;
+    password: string;
+    last_login: string | null;
+    is_superuser: boolean;
+    first_name: string;
+    last_name: string;
+    is_staff: boolean;
+    is_active: boolean;
+    date_joined: string;
+    email: string;
+    Fullname: string;
+    groups: any[];
+    user_permissions: any[];
+}
+
+interface Subscription {
+    id: number;
+    title: string;
+    Description: string;
+    price: string;
+    billing_cycle: string;
+    features: Array<{
+        id: number;
+        description: string;
+    }>;
+}
+
+interface Payment {
+    id: number;
+    user: User;
+    subscription: Subscription;
+    amount: string;
+    transaction_id: string;
+    invoice_id: string;
+    status: string;
+    payment_date: string;
+    created_at: string;
+    updated_at: string;
+}
+
+interface PaymentsResponse {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: Payment[];
+}
 
 export default function Subscribers() {
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterSubscription] = useState('all');
+    const [payments, setPayments] = useState<Payment[]>([]);
+    const [loading, setLoading] = useState(true);
     const itemsPerPage = 10;
 
-    const users = [
-        {
-            id: 1,
-            name: 'Savannah Nguyen',
-            email: 'demo59@gmail.com',
-            registrationDate: 'January 20, 2025',
-            subscription: 'Basic Protection',
-            image: userImage
-        },
-        {
-            id: 2,
-            name: 'Annette Black',
-            email: 'demo59@gmail.com',
-            registrationDate: 'February 15, 2025',
-            subscription: 'Silver Protection',
-            image: userImage
-        },
-        {
-            id: 3,
-            name: 'Cody Fisher',
-            email: 'demo59@gmail.com',
-            registrationDate: 'March 10, 2025',
-            subscription: 'Gold Protection',
-            image: userImage
-        },
-        {
-            id: 4,
-            name: 'Brooklyn Simmons',
-            email: 'demo59@gmail.com',
-            registrationDate: 'April 09, 2025',
-            subscription: 'Basic Protection',
-            image: userImage
-        },
-        {
-            id: 5,
-            name: 'Ralph Edwards',
-            email: 'demo59@gmail.com',
-            registrationDate: 'May 12, 2025',
-            subscription: 'Silver Protection',
-            image: userImage
-        },
-        {
-            id: 6,
-            name: 'Courtney Henry',
-            email: 'demo59@gmail.com',
-            registrationDate: 'June 12, 2025',
-            subscription: 'Gold Protection',
-            image: userImage
-        },
-        {
-            id: 7,
-            name: 'Bessie Cooper',
-            email: 'demo59@gmail.com',
-            registrationDate: 'April 12, 2025',
-            subscription: 'Basic Protection',
-            image: userImage
-        },
-        {
-            id: 8,
-            name: 'Esther Howard',
-            email: 'demo59@gmail.com',
-            registrationDate: 'April 12, 2025',
-            subscription: 'Silver Protection',
-            image: userImage
-        },
-        {
-            id: 9,
-            name: 'Eleanor Pena',
-            email: 'demo59@gmail.com',
-            registrationDate: 'April 12, 2025',
-            subscription: 'Gold Protection',
-            image: userImage
-        },
-        {
-            id: 10,
-            name: 'Cameron Williamson',
-            email: 'demo59@gmail.com',
-            registrationDate: 'April 12, 2025',
-            subscription: 'Silver Protection',
-            image: userImage
-        },
-        {
-            id: 11,
-            name: 'Guy Hawkins',
-            email: 'demo59@gmail.com',
-            registrationDate: 'April 12, 2025',
-            subscription: 'Basic Protection',
-            image: userImage
-        },
-        {
-            id: 12,
-            name: 'Jenny Wilson',
-            email: 'demo59@gmail.com',
-            registrationDate: 'June 22, 2025',
-            subscription: 'Gold Protection',
-            image: userImage
-        },
-        {
-            id: 13,
-            name: 'Jacob Jones',
-            email: 'demo59@gmail.com',
-            registrationDate: 'July 04, 2025',
-            subscription: 'Silver Protection',
-            image: userImage
-        },
-        {
-            id: 14,
-            name: 'Devon Lane',
-            email: 'demo59@gmail.com',
-            registrationDate: 'July 20, 2025',
-            subscription: 'Basic Protection',
-            image: userImage
-        },
-        {
-            id: 15,
-            name: 'Kristin Watson',
-            email: 'demo59@gmail.com',
-            registrationDate: 'August 01, 2025',
-            subscription: 'Gold Protection',
-            image: userImage
-        },
-        {
-            id: 16,
-            name: 'Floyd Miles',
-            email: 'demo59@gmail.com',
-            registrationDate: 'August 11, 2025',
-            subscription: 'Silver Protection',
-            image: userImage
-        },
-        {
-            id: 17,
-            name: 'Wade Warren',
-            email: 'demo59@gmail.com',
-            registrationDate: 'August 22, 2025',
-            subscription: 'Basic Protection',
-            image: userImage
-        },
-        {
-            id: 18,
-            name: 'Arlene McCoy',
-            email: 'demo59@gmail.com',
-            registrationDate: 'September 03, 2025',
-            subscription: 'Gold Protection',
-            image: userImage
-        },
-        {
-            id: 19,
-            name: 'Darlene Robertson',
-            email: 'demo59@gmail.com',
-            registrationDate: 'September 10, 2025',
-            subscription: 'Silver Protection',
-            image: userImage
-        },
-        {
-            id: 20,
-            name: 'Theresa Webb',
-            email: 'demo59@gmail.com',
-            registrationDate: 'September 22, 2025',
-            subscription: 'Basic Protection',
-            image: userImage
-        },
-        {
-            id: 21,
-            name: 'Leslie Alexander',
-            email: 'demo59@gmail.com',
-            registrationDate: 'October 01, 2025',
-            subscription: 'Gold Protection',
-            image: userImage
-        },
-        {
-            id: 22,
-            name: 'Marvin McKinney',
-            email: 'demo59@gmail.com',
-            registrationDate: 'October 10, 2025',
-            subscription: 'Silver Protection',
-            image: userImage
-        },
-        {
-            id: 23,
-            name: 'Jerome Bell',
-            email: 'demo59@gmail.com',
-            registrationDate: 'October 18, 2025',
-            subscription: 'Basic Protection',
-            image: userImage
-        },
-        {
-            id: 24,
-            name: 'Albert Flores',
-            email: 'demo59@gmail.com',
-            registrationDate: 'October 25, 2025',
-            subscription: 'Gold Protection',
-            image: userImage
-        },
-        {
-            id: 25,
-            name: 'Eleanor Rigby',
-            email: 'demo59@gmail.com',
-            registrationDate: 'November 03, 2025',
-            subscription: 'Silver Protection',
-            image: userImage
-        },
-        {
-            id: 26,
-            name: 'Phillip Nguyen',
-            email: 'demo59@gmail.com',
-            registrationDate: 'November 10, 2025',
-            subscription: 'Basic Protection',
-            image: userImage
-        },
-        {
-            id: 27,
-            name: 'Angela Gray',
-            email: 'demo59@gmail.com',
-            registrationDate: 'November 20, 2025',
-            subscription: 'Gold Protection',
-            image: userImage
-        },
-        {
-            id: 28,
-            name: 'Martha Craig',
-            email: 'demo59@gmail.com',
-            registrationDate: 'December 02, 2025',
-            subscription: 'Silver Protection',
-            image: userImage
-        },
-        {
-            id: 29,
-            name: 'Harold King',
-            email: 'demo59@gmail.com',
-            registrationDate: 'December 10, 2025',
-            subscription: 'Basic Protection',
-            image: userImage
-        },
-        {
-            id: 30,
-            name: 'Kathryn Murphy',
-            email: 'demo59@gmail.com',
-            registrationDate: 'December 20, 2025',
-            subscription: 'Gold Protection',
-            image: userImage
-        }
-    ];
-    ;
+    // Fetch payments from API
+    useEffect(() => {
+        const fetchPayments = async () => {
+            try {
+                setLoading(true);
+                const response = await apiRequest(
+                    "GET", 
+                    "/payment/payments/",
+                    null,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${localStorage.getItem("authToken")}`
+                        }
+                    }
+                );
+
+                console.log("Fetched payments:", response); // Debug log
+
+                if (response.results) {
+                    setPayments(response.results);
+                } else {
+                    console.error("No payments data found in response");
+                    setPayments([]);
+                }
+            } catch (error) {
+                console.error("Failed to fetch payments:", error);
+                setPayments([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchPayments();
+    }, []);
+
+    // Map API data to user structure
+    const users = useMemo(() => {
+        return payments.map((payment, index) => {
+            const user = payment.user;
+            const subscription = payment.subscription;
+            
+            // Format date
+            const formatDate = (dateString: string) => {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            };
+
+            // Determine subscription type based on price or title
+            const getSubscriptionType = (sub: Subscription) => {
+                const price = parseFloat(sub.price);
+                if (price === 0) return "Basic Protection";
+                if (price <= 14.99) return "Silver Protection";
+                if (price <= 29.99) return "Gold Protection";
+                return "Premium Protection";
+            };
+
+            return {
+                id: payment.id,
+                name: user.Fullname || `${user.first_name} ${user.last_name}`.trim() || `User ${user.id}`,
+                email: user.email,
+                registrationDate: formatDate(payment.payment_date),
+                subscription: getSubscriptionType(subscription),
+                image: userImage,
+                originalData: payment
+            };
+        });
+    }, [payments]);
 
     // Filter users based on search term and subscription filter
     const filteredUsers = useMemo(() => {
@@ -315,7 +194,29 @@ export default function Subscribers() {
         // Add your remove logic here
     };
 
-    // const subscriptionTypes = ['all', 'Basic Protection', 'Silver Protection', 'Gold Protection'];
+    if (loading) {
+        return (
+            <div className="min-h-screen p-6">
+                <div className='bg-[#0D314B] rounded-lg'>
+                    <div className="flex justify-between items-center p-6">
+                        <h1 className="text-[20px] font-semibold text-[#F9FAFB]">Subscribers</h1>
+                        <div className='relative'>
+                            <input
+                                type="text"
+                                placeholder="Search"
+                                disabled
+                                className="w-full px-4 py-2 border border-[#007ED6] rounded-lg focus:ring-2 focus:ring-[#007ED6] focus:border-[#007ED6] opacity-50"
+                            />
+                            <Search size={18} className='absolute right-4 top-3 cursor-pointer' />
+                        </div>
+                    </div>
+                    <div className="flex justify-center items-center py-12">
+                        <p className="text-white">Loading subscribers...</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen  p-6">
@@ -334,8 +235,6 @@ export default function Subscribers() {
                         <Search size={18} className='absolute right-4 top-3 cursor-pointer' />
                     </div>
                 </div>
-
-
 
                 {/* Table Container */}
                 <div className="rounded-lg shadow-sm border border-[#007ED6] overflow-hidden">
@@ -359,60 +258,68 @@ export default function Subscribers() {
                                     <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                                         Subscriptions
                                     </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                                    {/* <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                                         Action
-                                    </th>
+                                    </th> */}
                                 </tr>
                             </thead>
                             <tbody className="">
-                                {currentUsers.map((user) => (
-                                    <tr key={user.id} className="">
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
-                                            {user.id}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
-                                            <div className='flex items-center gap-3'>
-                                                <Image
-                                                    src={user?.image}
-                                                    alt={user?.name}
-                                                    width={120}
-                                                    height={60}
-                                                    className='w-10 h-10 object-fill rounded'
-                                                />
-                                                {user.name}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[#F9FAFB]">
-                                            {user.email}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
-                                            {user.registrationDate}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <span
-                                                className={`inline-flex px-2 py-1 text-xs font-semibold text-[#F9FAFB] `}
-                                            >
-                                                {user.subscription}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                            <div className="flex space-x-3">
-                                                <button
-                                                    onClick={() => handleBlock(user.id)}
-                                                    className="bg-[#0ABF9D4D] px-4 py-1 text-[#0ABF9D] rounded cursor-pointer font-medium transition-colors"
-                                                >
-                                                    Block
-                                                </button>
-                                                <button
-                                                    onClick={() => handleRemove(user.id)}
-                                                    className="bg-[#551214] px-4 py-1 text-[#FE4D4F] rounded cursor-pointer font-medium transition-colors"
-                                                >
-                                                    Remove
-                                                </button>
-                                            </div>
+                                {currentUsers.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={6} className="px-6 py-8 text-center text-white">
+                                            {users.length === 0 ? "No subscribers found" : "No matching subscribers found"}
                                         </td>
                                     </tr>
-                                ))}
+                                ) : (
+                                    currentUsers.map((user, index) => (
+                                        <tr key={user.id} className="">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                                                {startIndex + index + 1}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
+                                                <div className='flex items-center gap-3'>
+                                                    <Image
+                                                        src={user?.image}
+                                                        alt={user?.name}
+                                                        width={120}
+                                                        height={60}
+                                                        className='w-10 h-10 object-fill rounded'
+                                                    />
+                                                    {user.name}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-[#F9FAFB]">
+                                                {user.email}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                                                {user.registrationDate}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <span
+                                                    className={`inline-flex px-2 py-1 text-xs font-semibold text-[#F9FAFB] `}
+                                                >
+                                                    {user.subscription}
+                                                </span>
+                                            </td>
+                                            {/* <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <div className="flex space-x-3">
+                                                    <button
+                                                        onClick={() => handleBlock(user.id)}
+                                                        className="bg-[#0ABF9D4D] px-4 py-1 text-[#0ABF9D] rounded cursor-pointer font-medium transition-colors"
+                                                    >
+                                                        Block
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleRemove(user.id)}
+                                                        className="bg-[#551214] px-4 py-1 text-[#FE4D4F] rounded cursor-pointer font-medium transition-colors"
+                                                    >
+                                                        Remove
+                                                    </button>
+                                                </div>
+                                            </td> */}
+                                        </tr>
+                                    ))
+                                )}
                             </tbody>
                         </table>
                     </div>
@@ -435,45 +342,47 @@ export default function Subscribers() {
                             </div>
 
                             {/* Pagination Controls */}
-                            <div className="flex items-center space-x-3">
-                                {/* Previous Button */}
-                                <button
-                                    onClick={() => handlePageChange(currentPage - 1)}
-                                    disabled={currentPage === 1}
-                                    className={`w-10 h-10 font-bold text-sm rounded transition-colors cursor-pointer ${currentPage === 1
-                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                        }`}
-                                >
-                                    <ChevronLeft size={24} color='black' className='font-bold mx-auto' />
-                                </button>
-
-                                {/* Page Numbers */}
-                                {getPageNumbers().map((page) => (
+                            {totalPages > 0 && (
+                                <div className="flex items-center space-x-3">
+                                    {/* Previous Button */}
                                     <button
-                                        key={page}
-                                        onClick={() => handlePageChange(page)}
-                                        className={`w-10 h-10 font-bold text-sm rounded transition-colors cursor-pointer ${currentPage === page
-                                            ? 'bg-[#245FE7] text-white'
+                                        onClick={() => handlePageChange(currentPage - 1)}
+                                        disabled={currentPage === 1}
+                                        className={`w-10 h-10 font-bold text-sm rounded transition-colors cursor-pointer ${currentPage === 1
+                                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                             : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                             }`}
                                     >
-                                        {page}
+                                        <ChevronLeft size={24} color='black' className='font-bold mx-auto' />
                                     </button>
-                                ))}
 
-                                {/* Next Button */}
-                                <button
-                                    onClick={() => handlePageChange(currentPage + 1)}
-                                    disabled={currentPage === totalPages || totalPages === 0}
-                                    className={`w-10 h-10 font-bold cursor-pointer text-sm rounded transition-colors ${currentPage === totalPages || totalPages === 0
-                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                        }`}
-                                >
-                                    <ChevronRight size={24} color='black' className='font-bold mx-auto' />
-                                </button>
-                            </div>
+                                    {/* Page Numbers */}
+                                    {getPageNumbers().map((page) => (
+                                        <button
+                                            key={page}
+                                            onClick={() => handlePageChange(page)}
+                                            className={`w-10 h-10 font-bold text-sm rounded transition-colors cursor-pointer ${currentPage === page
+                                                ? 'bg-[#245FE7] text-white'
+                                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                                }`}
+                                        >
+                                            {page}
+                                        </button>
+                                    ))}
+
+                                    {/* Next Button */}
+                                    <button
+                                        onClick={() => handlePageChange(currentPage + 1)}
+                                        disabled={currentPage === totalPages || totalPages === 0}
+                                        className={`w-10 h-10 font-bold cursor-pointer text-sm rounded transition-colors ${currentPage === totalPages || totalPages === 0
+                                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                            }`}
+                                    >
+                                        <ChevronRight size={24} color='black' className='font-bold mx-auto' />
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
