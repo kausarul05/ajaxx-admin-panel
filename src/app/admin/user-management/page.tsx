@@ -271,9 +271,9 @@ export default function UserManagement() {
                                     <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                                         Registration Date
                                     </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                                    {/* <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                                         Subscriptions
-                                    </th>
+                                    </th> */}
                                     <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                                         Status
                                     </th>
@@ -322,13 +322,13 @@ export default function UserManagement() {
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
                                                 {formatDate(user.date_joined)}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
+                                            {/* <td className="px-6 py-4 whitespace-nowrap">
                                                 <span
                                                     className={`inline-flex px-2 py-1 text-xs font-semibold text-[#F9FAFB]`}
                                                 >
                                                     Basic Protection
                                                 </span>
-                                            </td>
+                                            </td> */}
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <span
                                                     className={`inline-flex px-2 py-1 text-xs font-semibold rounded ${
