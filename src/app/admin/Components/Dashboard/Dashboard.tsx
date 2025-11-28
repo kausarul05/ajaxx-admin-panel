@@ -17,10 +17,13 @@ interface StatItem {
 interface User {
     id: number;
     name: string;
-    email: string;
+    phone: string;
     registrationDate: string;
     subscription: string;
     image: typeof userImage;
+    Fullname?: string;
+    date_joined: string;
+    is_active: boolean;
 }
 
 interface ChartData {
@@ -69,18 +72,76 @@ interface EarningsOverviewResponse {
         trend: string;
     };
 }
+
 export default function Dashboard() {
-    const [totalUsers, setTotalUsers] = useState<string>('0.00');
-    const [totalEarnings, setTotalEarnings] = useState<string>('0.00');
-    const [subscribersCount, setSubscribersCount] = useState<string>('0');
+    const [totalUsers, setTotalUsers] = useState<string>('1,250.00');
+    const [totalEarnings, setTotalEarnings] = useState<string>('45,678.00');
+    const [subscribersCount, setSubscribersCount] = useState<string>('892');
     const [chartData, setChartData] = useState<ChartData[]>([]);
-    const [growthPercentage, setGrowthPercentage] = useState<number>(0);
-    const [loading, setLoading] = useState(true);
+    const [growthPercentage, setGrowthPercentage] = useState<number>(15.5);
+    const [loading, setLoading] = useState(false); // Set to false since we're using fake data
     const [users, setUsers] = useState<User[]>([]);
-    // const [loading, setLoading] = useState(true);
     const [totalItems, setTotalItems] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const itemsPerPage = 10;
+
+    // Fake data for demonstration
+    const fakeUsers: User[] = [
+        {
+            id: 1,
+            name: 'Savannah Nguyen',
+            Fullname: 'Savannah Nguyen',
+            phone: '0123-456-7890',
+            registrationDate: 'January 20, 2025',
+            date_joined: '2025-01-20',
+            subscription: 'Monthly',
+            image: userImage,
+            is_active: true
+        },
+        {
+            id: 2,
+            name: 'Annette Black',
+            Fullname: 'Annette Black',
+            phone: '0123-456-7890',
+            registrationDate: 'February 15, 2025',
+            date_joined: '2025-02-15',
+            subscription: 'Free ',
+            image: userImage,
+            is_active: true
+        },
+        {
+            id: 3,
+            name: 'Cody Fisher',
+            Fullname: 'Cody Fisher',
+            phone: '0123-456-7890',
+            registrationDate: 'March 10, 2025',
+            date_joined: '2025-03-10',
+            subscription: '6 Monthly',
+            image: userImage,
+            is_active: false
+        },
+        {
+            id: 4,
+            name: 'Brooklyn Simmons',
+            Fullname: 'Brooklyn Simmons',
+            phone: '0123-456-7890',
+            registrationDate: 'April 09, 2025',
+            date_joined: '2025-04-09',
+            subscription: 'Free',
+            image: userImage,
+            is_active: true
+        },
+    ];
+
+    const fakeChartData: ChartData[] = [
+        { month: 'Jan', revenue: 12000 },
+        { month: 'Feb', revenue: 19000 },
+        { month: 'Mar', revenue: 15000 },
+        { month: 'Apr', revenue: 22000 },
+        { month: 'May', revenue: 28000 },
+        { month: 'Jun', revenue: 32000 },
+        { month: 'Jul', revenue: 45678 },
+    ];
 
     const stats: StatItem[] = [
         {
@@ -88,11 +149,11 @@ export default function Dashboard() {
             value: `$${totalUsers}`,
             icon: <Users size={24} color='#0ABF9D' className='font-bold' />
         },
-        {
-            title: 'Subscribers',
-            value: `$${subscribersCount}`,
-            icon: <Users size={24} color='#0ABF9D' className='font-bold' />
-        },
+        // {
+        //     title: 'Subscribers',
+        //     value: `$${subscribersCount}`,
+        //     icon: <Users size={24} color='#0ABF9D' className='font-bold' />
+        // },
         {
             title: 'Total Earning',
             value: `$${totalEarnings}`,
@@ -100,41 +161,8 @@ export default function Dashboard() {
         },
     ];
 
-    // const users: User[] = [
-    //   {
-    //     id: 1,
-    //     name: 'Savannah Nguyen',
-    //     email: 'demo59@gmail.com',
-    //     registrationDate: 'January 20, 2025',
-    //     subscription: 'Basic Protection',
-    //     image: userImage
-    //   },
-    //   {
-    //     id: 2,
-    //     name: 'Annette Black',
-    //     email: 'demo59@gmail.com',
-    //     registrationDate: 'February 15, 2025',
-    //     subscription: 'Silver Protection',
-    //     image: userImage
-    //   },
-    //   {
-    //     id: 3,
-    //     name: 'Cody Fisher',
-    //     email: 'demo59@gmail.com',
-    //     registrationDate: 'March 10, 2025',
-    //     subscription: 'Gold Protection',
-    //     image: userImage
-    //   },
-    //   {
-    //     id: 4,
-    //     name: 'Brooklyn Simmons',
-    //     email: 'demo59@gmail.com',
-    //     registrationDate: 'April 09, 2025',
-    //     subscription: 'Basic Protection',
-    //     image: userImage
-    //   },
-    // ];
-
+    // Commented real-time API calls
+    /*
     // Fetch dashboard data
     const fetchDashboardData = async () => {
         try {
@@ -218,8 +246,6 @@ export default function Dashboard() {
         }
     };
 
-
-
     const fetchUsers = async () => {
         try {
             setLoading(true);
@@ -250,9 +276,10 @@ export default function Dashboard() {
             setLoading(false);
         }
     };
+    */
 
-     const getDisplayName = (user: User) => {
-        return user.Fullname || user.email.split('@')[0] || 'Unknown User';
+    const getDisplayName = (user: User) => {
+        return user.Fullname  || 'Unknown User';
     };
 
     const formatDate = (dateString: string) => {
@@ -265,8 +292,17 @@ export default function Dashboard() {
     };
 
     useEffect(() => {
+        // Using fake data instead of API calls
+        setUsers(fakeUsers);
+        setChartData(fakeChartData);
+        setTotalItems(fakeUsers.length);
+        setTotalPages(1);
+
+        // Commented real API calls
+        /*
         fetchDashboardData();
         fetchUsers()
+        */
     }, []);
 
     // Custom tooltip
@@ -293,12 +329,12 @@ export default function Dashboard() {
     }
 
     return (
-        <div className="min-h-screen bg-[#0A2131] p-6">
+        <div className="min-h-screen bg-[#000000] p-6">
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 {stats.map((stat, index) => (
-                    <div key={index} className="bg-[#0D314B] rounded-lg shadow-sm p-6">
+                    <div key={index} className="bg-[#1A2028] rounded-xl shadow-sm p-6">
                         <div className='flex  justify-between items-center p-10 px-18'>
                             <div>
                                 <h3 className="text-sm font-semibold text-white mb-2">{stat.title}</h3>
@@ -312,7 +348,7 @@ export default function Dashboard() {
 
             <div>
                 {/* Earning Summary Section with Recharts */}
-                <div className="bg-[#0D314B] rounded-lg shadow-sm p-6">
+                <div className="bg-[#1A2028] rounded-xl shadow-sm p-6">
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-lg font-semibold text-white">Earning Summary</h2>
                         <div className="flex items-center gap-4">
@@ -359,15 +395,15 @@ export default function Dashboard() {
                 </div>
 
                 {/* User Section */}
-                <div className="bg-[#0D314B] rounded-lg shadow-sm p-6 mt-10">
+                <div className="bg-[#1A2028] rounded-xl shadow-sm p-6 mt-10">
                     <h2 className="text-lg font-semibold text-white mb-6">User</h2>
 
                     {/* Table */}
-                    <div className="rounded-lg shadow-sm border border-[#007ED6] overflow-hidden">
+                    <div className="rounded-lg shadow-sm overflow-hidden">
                         {/* Table */}
                         <div className="overflow-x-auto">
-                            <table className="w-full">
-                                <thead className="border-b border-[#007ED6]">
+                            <table className="w-full border border-[#60A5FB66]">
+                                <thead className="border-b border-[#60A5FB66] bg-[#60A5FB29] rounded-2xl">
                                     <tr>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                                             NO
@@ -376,7 +412,7 @@ export default function Dashboard() {
                                             Name
                                         </th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                                            Email
+                                            Phone Number
                                         </th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                                             Registration Date
@@ -384,32 +420,32 @@ export default function Dashboard() {
                                         <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                                             Subscriptions
                                         </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                                        {/* <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                                             Status
-                                        </th>
+                                        </th> */}
                                     </tr>
                                 </thead>
                                 <tbody className="">
                                     {
                                         users.map((user, index) => (
-                                            <tr key={user.id} className="">
+                                            <tr key={user.id} className="border-b border-[#60A5FB66]">
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
                                                     {index + 1}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
                                                     <div className='flex items-center gap-3'>
-                                                        <Image
+                                                        {/* <Image
                                                             src={userImage}
                                                             alt={"user profile"}
                                                             width={120}
                                                             height={60}
                                                             className='w-10 h-10 object-fill rounded'
-                                                        />
+                                                        /> */}
                                                         {getDisplayName(user)}
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-[#F9FAFB]">
-                                                    {user.email}
+                                                    {user.phone}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
                                                     {formatDate(user.date_joined)}
@@ -418,10 +454,10 @@ export default function Dashboard() {
                                                     <span
                                                         className={`inline-flex px-2 py-1 text-xs font-semibold text-[#F9FAFB]`}
                                                     >
-                                                        Basic Protection
+                                                        {user.subscription}
                                                     </span>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                {/* <td className="px-6 py-4 whitespace-nowrap">
                                                     <span
                                                         className={`inline-flex px-2 py-1 text-xs font-semibold rounded ${user.is_active === false
                                                             ? 'bg-red-500/20 text-red-300 border border-red-500'
@@ -430,49 +466,6 @@ export default function Dashboard() {
                                                     >
                                                         {user.is_active === false ? 'Blocked' : 'Active'}
                                                     </span>
-                                                </td>
-                                                {/* <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                    <div className="flex space-x-3">
-                                                        {user.is_active === false ? (
-                                                            // Show Unblock button for blocked users
-                                                            <button
-                                                                onClick={() => handleUnblock(user.id)}
-                                                                disabled={actionLoading === user.id}
-                                                                className="bg-[#0ABF9D4D] px-4 py-1 text-[#0ABF9D] rounded cursor-pointer font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                                                            >
-                                                                {actionLoading === user.id ? (
-                                                                    <>
-                                                                        <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                                                        </svg>
-                                                                        Unblocking...
-                                                                    </>
-                                                                ) : (
-                                                                    'Unblock'
-                                                                )}
-                                                            </button>
-                                                        ) : (
-                                                            // Show Block button for active users
-                                                            <button
-                                                                onClick={() => handleBlock(user.id)}
-                                                                disabled={actionLoading === user.id}
-                                                                className="bg-[#0ABF9D4D] px-4 py-1 text-[#0ABF9D] rounded cursor-pointer font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                                                            >
-                                                                {actionLoading === user.id ? (
-                                                                    <>
-                                                                        <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                                                        </svg>
-                                                                        Blocking...
-                                                                    </>
-                                                                ) : (
-                                                                    'Block'
-                                                                )}
-                                                            </button>
-                                                        )}
-                                                    </div>
                                                 </td> */}
                                             </tr>
                                         ))

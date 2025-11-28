@@ -66,7 +66,7 @@ export default function Sidebar() {
     };
 
     return (
-        <div className="w-[385px] bg-[#0D314B] h-screen text-white py-14 pt-4 px-10 fixed z-50">
+        <div className="w-[385px] bg-[#1A2028] h-screen text-white py-14 pt-4 px-10 fixed z-50">
             <div>
                 <Link href="/">
                     <Image
@@ -93,7 +93,7 @@ export default function Sidebar() {
                                 {/* Parent menu item - just for hover, not clickable */}
                                 <div
                                     className={`flex items-center justify-between gap-3 p-4 rounded-lg cursor-default transition-colors ${isActive
-                                            ? "bg-[#007ED6] text-white font-semibold"
+                                            ? "bg-[#60A5FB] text-white font-semibold"
                                             : "hover:bg-gray-700"
                                         }`}
                                 >
@@ -123,7 +123,7 @@ export default function Sidebar() {
                                             >
                                                 <div
                                                     className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${pathname === nestedItem.href
-                                                            ? "bg-[#007ED6] text-white font-semibold"
+                                                            ? "bg-[#60A5FB] text-white font-semibold"
                                                             : "hover:bg-gray-700"
                                                         }`}
                                                 >
@@ -143,7 +143,7 @@ export default function Sidebar() {
                             <Link href={item.href} passHref>
                                 <div
                                     className={`flex items-center gap-3 p-4 rounded-lg cursor-pointer transition-colors ${pathname === item.href
-                                            ? "bg-[#007ED6] text-white font-semibold"
+                                            ? "bg-[#60A5FB] text-white font-semibold"
                                             : "hover:bg-gray-700"
                                         }`}
                                 >
