@@ -1,27 +1,43 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers'; // Note: cookies() is now recommended
+import { cookies } from 'next/headers';
 
 export async function middleware(request) {
-  console.log('🔥 Middleware running for:', request.nextUrl.pathname);
+  console.log('🔥 Middleware running for:', request.url);
   
-  // In Next.js 15, you might need to use cookies() differently
-  const cookieStore = cookies();
+  // Await the cookies() function
+  const cookieStore = await cookies();
   const token = cookieStore.get('authToken')?.value;
   
+  const { pathname } = new URL(request.url);
+  
+  // Protected paths that require authentication
   const protectedPaths = [
     '/admin',
-    '/admin/history',
-    '/admin/review',
-    '/admin/edit-profile',
-    '/admin/change-password',
+    '/admin/user-management',
+    '/admin/subscriptions/plans',
+    '/admin/subscriptions/subscribers',
+    '/admin/products-management',
+    '/admin/review-management',
+    '/admin/settings',
   ];
   
   const isProtected = protectedPaths.some(path => 
-    request.nextUrl.pathname.startsWith(path)
+    pathname.startsWith(path)
   );
   
+  // Handle root route ('/')
+  if (pathname === '/') {
+    if (token) {
+      console.log('Token exists, redirecting from / to /admin');
+      return NextResponse.redirect(new URL('/admin', request.url));
+    }
+    // No token, allow access to login page
+    return NextResponse.next();
+  }
+  
+  // Handle protected routes
   if (isProtected && !token) {
-    console.log(`Redirecting from ${request.nextUrl.pathname} to /`);
+    console.log(`No token, redirecting from ${pathname} to /`);
     return NextResponse.redirect(new URL('/', request.url));
   }
   
@@ -30,6 +46,7 @@ export async function middleware(request) {
 
 export const config = {
   matcher: [
+    '/',
     '/admin/:path*',
   ],
 };

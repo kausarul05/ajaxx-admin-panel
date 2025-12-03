@@ -75,6 +75,7 @@ export default function LoginPage() {
         if (accessToken || userData) {
           if (accessToken) {
             localStorage.setItem("authToken", accessToken);
+            document.cookie = `authToken=${accessToken}; path=/; SameSite=Lax`;
           }
           if (userData) {
             localStorage.setItem("userData", JSON.stringify(userData));
@@ -223,7 +224,7 @@ export default function LoginPage() {
             )}
           </button>
 
-          <button
+          {/* <button
             className="w-full bg-[#0D314B] border border-[#007ED6] text-white py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={isLoading}
           >
@@ -256,9 +257,9 @@ export default function LoginPage() {
               />
             </svg>
             Continue with Google
-          </button>
+          </button> */}
 
-          <div className="text-sm text-white text-center">
+          {/* <div className="text-sm text-white text-center">
             Don&apos;t have an account?{" "}
             <button
               onClick={() => router.push("/register")}
@@ -267,7 +268,7 @@ export default function LoginPage() {
             >
               Sign Up
             </button>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
