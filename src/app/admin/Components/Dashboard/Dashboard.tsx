@@ -17,10 +17,12 @@ interface StatItem {
 interface User {
     id: number;
     name: string;
+    Fullname?: string;
     email: string;
-    registrationDate: string;
-    subscription: string;
-    image: typeof userImage;
+    date_joined: string;
+    is_active: boolean;
+    image?: typeof userImage;
+    subscription?: string;
 }
 
 interface ChartData {
@@ -37,111 +39,90 @@ interface CustomTooltipProps extends TooltipProps<number, string> {
     label?: string;
 }
 
-interface ApiResponse<T> {
-    data?: T;
-    error?: string;
+// API Response types
+interface TotalUsersResponse {
+    total_users?: number;
+    data?: {
+        total_users?: number;
+    };
 }
 
-interface TotalEarningsResponse {
-    success: boolean;
-    message: string;
-    data: {
-        total: number;
+interface EarningsResponse {
+    data?: {
+        total?: number;
     };
+    total?: number;
 }
 
 interface SubscribersResponse {
-    count: number;
-    next: string | null;
-    previous: string | null;
-    results: any[];
+    count?: number;
+    data?: {
+        count?: number;
+    };
+}
+
+interface EarningsItem {
+    month: string;
+    total: number;
 }
 
 interface EarningsOverviewResponse {
-    success: boolean;
-    message: string;
-    data: {
-        earnings: Array<{
-            month: string;
-            total: number;
-        }>;
-        growth_percentage: number;
-        trend: string;
+    data?: {
+        earnings?: EarningsItem[];
+        growth_percentage?: number;
     };
+    earnings?: EarningsItem[];
+    growth_percentage?: number;
 }
+
+interface UsersApiResponse {
+    results: User[];
+    total: number;
+    total_pages: number;
+}
+
 export default function Dashboard() {
-    const [totalUsers, setTotalUsers] = useState<string>('0.00');
-    const [totalEarnings, setTotalEarnings] = useState<string>('0.00');
-    const [subscribersCount, setSubscribersCount] = useState<string>('0');
     const [chartData, setChartData] = useState<ChartData[]>([]);
     const [growthPercentage, setGrowthPercentage] = useState<number>(0);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState<boolean>(true);
     const [users, setUsers] = useState<User[]>([]);
-    // const [loading, setLoading] = useState(true);
-    const [totalItems, setTotalItems] = useState(0);
-    const [totalPages, setTotalPages] = useState(0);
-    const itemsPerPage = 10;
+    const [totalItems, setTotalItems] = useState<number>(0);
+    const [totalPages, setTotalPages] = useState<number>(0);
+    const [totalUsers, setTotalUsers] = useState<number>(0);
+    const [totalEarnings, setTotalEarnings] = useState<number>(0);
+    const [subscribersCount, setSubscribersCount] = useState<number>(0);
 
     const stats: StatItem[] = [
         {
             title: 'Total User',
-            value: `$${totalUsers}`,
+            value: `$${totalUsers.toFixed(2)}`,
             icon: <Users size={24} color='#0ABF9D' className='font-bold' />
         },
         {
             title: 'Subscribers',
-            value: `$${subscribersCount}`,
+            value: `$${subscribersCount.toLocaleString()}`,
             icon: <Users size={24} color='#0ABF9D' className='font-bold' />
         },
         {
             title: 'Total Earning',
-            value: `$${totalEarnings}`,
+            value: `$${totalEarnings.toFixed(2)}`,
             icon: <Users size={24} color='#0ABF9D' className='font-bold' />
         },
     ];
 
-    // const users: User[] = [
-    //   {
-    //     id: 1,
-    //     name: 'Savannah Nguyen',
-    //     email: 'demo59@gmail.com',
-    //     registrationDate: 'January 20, 2025',
-    //     subscription: 'Basic Protection',
-    //     image: userImage
-    //   },
-    //   {
-    //     id: 2,
-    //     name: 'Annette Black',
-    //     email: 'demo59@gmail.com',
-    //     registrationDate: 'February 15, 2025',
-    //     subscription: 'Silver Protection',
-    //     image: userImage
-    //   },
-    //   {
-    //     id: 3,
-    //     name: 'Cody Fisher',
-    //     email: 'demo59@gmail.com',
-    //     registrationDate: 'March 10, 2025',
-    //     subscription: 'Gold Protection',
-    //     image: userImage
-    //   },
-    //   {
-    //     id: 4,
-    //     name: 'Brooklyn Simmons',
-    //     email: 'demo59@gmail.com',
-    //     registrationDate: 'April 09, 2025',
-    //     subscription: 'Basic Protection',
-    //     image: userImage
-    //   },
-    // ];
-
-    // Fetch dashboard data
-    const fetchDashboardData = async () => {
+    const fetchDashboardData = async (): Promise<void> => {
         try {
             setLoading(true);
 
-            // Fetch total earnings
-            const totalUserResponse = await apiRequest(
+            // Helper function to safely extract number
+            const getNumberValue = (value: unknown): number => {
+                if (value === null || value === undefined) return 0;
+                const num = Number(value);
+                return isNaN(num) ? 0 : num;
+            };
+
+            // Fetch total users
+            const totalUserResponse = await apiRequest<TotalUsersResponse>(
                 "GET",
                 "/accounts/users/count/",
                 null,
@@ -151,13 +132,15 @@ export default function Dashboard() {
                     }
                 }
             );
-            // console.log(totalUserResponse)
-            if (totalUserResponse?.total_users) {
-                setTotalUsers(totalUserResponse.total_users);
+
+            if (totalUserResponse) {
+                const usersCount = totalUserResponse.total_users ?? totalUserResponse.data?.total_users;
+                if (usersCount !== undefined) {
+                    setTotalUsers(getNumberValue(usersCount));
+                }
             }
 
-
-            const earningsResponse = await apiRequest(
+            const earningsResponse = await apiRequest<EarningsResponse>(
                 "GET",
                 "/payment/payments/total-earnings/",
                 null,
@@ -168,14 +151,14 @@ export default function Dashboard() {
                 }
             );
 
-
-
-            if (earningsResponse.data) {
-                setTotalEarnings(earningsResponse.data.total.toFixed(2));
+            if (earningsResponse) {
+                const earnings = earningsResponse.data?.total ?? earningsResponse.total;
+                if (earnings !== undefined) {
+                    setTotalEarnings(getNumberValue(earnings));
+                }
             }
 
-            // Fetch subscribers count
-            const subscribersResponse = await apiRequest(
+            const subscribersResponse = await apiRequest<SubscribersResponse>(
                 "GET",
                 "/payment/payments/",
                 null,
@@ -186,12 +169,14 @@ export default function Dashboard() {
                 }
             );
 
-            if (subscribersResponse.count) {
-                setSubscribersCount(subscribersResponse.count.toString());
+            if (subscribersResponse) {
+                const count = subscribersResponse.count ?? subscribersResponse.data?.count;
+                if (count !== undefined) {
+                    setSubscribersCount(getNumberValue(count));
+                }
             }
 
-            // Fetch earnings overview
-            const earningsOverviewResponse = await apiRequest(
+            const earningsOverviewResponse = await apiRequest<EarningsOverviewResponse>(
                 "GET",
                 "/payment/payments/earnings-overview/",
                 null,
@@ -201,14 +186,33 @@ export default function Dashboard() {
                     }
                 }
             );
-            // console.log(earningsOverviewResponse)
-            if (earningsOverviewResponse.data) {
-                const earningsData = earningsOverviewResponse.data;
-                setChartData(earningsData.earnings.map(item => ({
-                    month: item.month,
-                    revenue: item.total
-                })));
-                setGrowthPercentage(earningsData.growth_percentage);
+
+            if (earningsOverviewResponse) {
+                const growth = earningsOverviewResponse.data?.growth_percentage ??
+                    earningsOverviewResponse.growth_percentage;
+                if (growth !== undefined) {
+                    setGrowthPercentage(getNumberValue(growth));
+                }
+
+                let earningsData: EarningsItem[] = [];
+
+                // Check if data.earnings exists and is an array
+                if (earningsOverviewResponse.data?.earnings &&
+                    Array.isArray(earningsOverviewResponse.data.earnings)) {
+                    earningsData = earningsOverviewResponse.data.earnings;
+                }
+                // Check if earnings exists and is an array
+                else if (earningsOverviewResponse.earnings &&
+                    Array.isArray(earningsOverviewResponse.earnings)) {
+                    earningsData = earningsOverviewResponse.earnings;
+                }
+
+                if (earningsData.length > 0) {
+                    setChartData(earningsData.map(item => ({
+                        month: item.month || '',
+                        revenue: getNumberValue(item.total)
+                    })));
+                }
             }
 
         } catch (error) {
@@ -218,29 +222,44 @@ export default function Dashboard() {
         }
     };
 
-
-
-    const fetchUsers = async () => {
+    const fetchUsers = async (): Promise<void> => {
         try {
             setLoading(true);
-            // Build query parameters
-            let endpoint = `/accounts/user_all/?page=1&page_size=5`;
+            const endpoint = `/accounts/user_all/?page=1&page_size=5`;
 
-            // Add search parameter if search term exists
-            // if (search) {
-            //   endpoint += `&search=${encodeURIComponent(search)}`;
-            // }
-
-            const data = await apiRequest("GET", endpoint, null, {
+            const data = await apiRequest<UsersApiResponse>("GET", endpoint, null, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("authToken")}`
                 }
             });
 
-            setUsers(data.results);
-            setTotalItems(data.total);
-            setTotalPages(data.total_pages);
-            // setCurrentPage(data.page);
+            // Check if data has the expected properties
+            if (data && typeof data === 'object') {
+                // Check if it has the results property
+                if ('results' in data && Array.isArray(data.results)) {
+                    setUsers(data.results);
+                } else {
+                    setUsers([]);
+                }
+
+                // Check if it has total property
+                if ('total' in data && typeof data.total === 'number') {
+                    setTotalItems(data.total);
+                } else {
+                    setTotalItems(0);
+                }
+
+                // Check if it has total_pages property
+                if ('total_pages' in data && typeof data.total_pages === 'number') {
+                    setTotalPages(data.total_pages);
+                } else {
+                    setTotalPages(0);
+                }
+            } else {
+                setUsers([]);
+                setTotalItems(0);
+                setTotalPages(0);
+            }
         } catch (error) {
             console.error('Failed to fetch users:', error);
             setUsers([]);
@@ -251,11 +270,11 @@ export default function Dashboard() {
         }
     };
 
-     const getDisplayName = (user: User) => {
-        return user.Fullname || user.email.split('@')[0] || 'Unknown User';
+    const getDisplayName = (user: User): string => {
+        return user.Fullname || user.name || user.email?.split('@')[0] || 'Unknown User';
     };
 
-    const formatDate = (dateString: string) => {
+    const formatDate = (dateString: string): string => {
         const date = new Date(dateString);
         return date.toLocaleDateString('en-US', {
             year: 'numeric',
@@ -266,10 +285,9 @@ export default function Dashboard() {
 
     useEffect(() => {
         fetchDashboardData();
-        fetchUsers()
+        fetchUsers();
     }, []);
 
-    // Custom tooltip
     const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label }) => {
         if (active && payload && payload.length) {
             return (
@@ -294,12 +312,10 @@ export default function Dashboard() {
 
     return (
         <div className="min-h-screen bg-[#0A2131] p-6">
-
-            {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 {stats.map((stat, index) => (
                     <div key={index} className="bg-[#0D314B] rounded-lg shadow-sm p-6">
-                        <div className='flex  justify-between items-center p-10 px-18'>
+                        <div className='flex justify-between items-center p-10 px-18'>
                             <div>
                                 <h3 className="text-sm font-semibold text-white mb-2">{stat.title}</h3>
                                 <p className="text-2xl font-bold text-white">{stat.value}</p>
@@ -311,7 +327,6 @@ export default function Dashboard() {
             </div>
 
             <div>
-                {/* Earning Summary Section with Recharts */}
                 <div className="bg-[#0D314B] rounded-lg shadow-sm p-6">
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-lg font-semibold text-white">Earning Summary</h2>
@@ -329,7 +344,6 @@ export default function Dashboard() {
                         </div>
                     </div>
 
-                    {/* Recharts Bar Chart */}
                     <div className="h-80">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
@@ -358,13 +372,10 @@ export default function Dashboard() {
                     </div>
                 </div>
 
-                {/* User Section */}
                 <div className="bg-[#0D314B] rounded-lg shadow-sm p-6 mt-10">
                     <h2 className="text-lg font-semibold text-white mb-6">User</h2>
 
-                    {/* Table */}
                     <div className="rounded-lg shadow-sm border border-[#007ED6] overflow-hidden">
-                        {/* Table */}
                         <div className="overflow-x-auto">
                             <table className="w-full">
                                 <thead className="border-b border-[#007ED6]">
@@ -389,7 +400,7 @@ export default function Dashboard() {
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody className="">
+                                <tbody>
                                     {
                                         users.map((user, index) => (
                                             <tr key={user.id} className="">
@@ -431,49 +442,6 @@ export default function Dashboard() {
                                                         {user.is_active === false ? 'Blocked' : 'Active'}
                                                     </span>
                                                 </td>
-                                                {/* <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                    <div className="flex space-x-3">
-                                                        {user.is_active === false ? (
-                                                            // Show Unblock button for blocked users
-                                                            <button
-                                                                onClick={() => handleUnblock(user.id)}
-                                                                disabled={actionLoading === user.id}
-                                                                className="bg-[#0ABF9D4D] px-4 py-1 text-[#0ABF9D] rounded cursor-pointer font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                                                            >
-                                                                {actionLoading === user.id ? (
-                                                                    <>
-                                                                        <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                                                        </svg>
-                                                                        Unblocking...
-                                                                    </>
-                                                                ) : (
-                                                                    'Unblock'
-                                                                )}
-                                                            </button>
-                                                        ) : (
-                                                            // Show Block button for active users
-                                                            <button
-                                                                onClick={() => handleBlock(user.id)}
-                                                                disabled={actionLoading === user.id}
-                                                                className="bg-[#0ABF9D4D] px-4 py-1 text-[#0ABF9D] rounded cursor-pointer font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                                                            >
-                                                                {actionLoading === user.id ? (
-                                                                    <>
-                                                                        <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                                                        </svg>
-                                                                        Blocking...
-                                                                    </>
-                                                                ) : (
-                                                                    'Block'
-                                                                )}
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                </td> */}
                                             </tr>
                                         ))
                                     }

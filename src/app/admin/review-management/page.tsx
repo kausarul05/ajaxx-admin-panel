@@ -16,19 +16,14 @@ interface Review {
     reviewer_name: string;
 }
 
-interface ApiResponse<T> {
-    data?: T;
+// Define API response type
+interface ReviewsResponse {
+    results?: Review[];
+    total_pages?: number;
+    total?: number;
+    page?: number;
     error?: string;
 }
-
-interface ReviewsResponse {
-    total: number;
-    page: number;
-    page_size: number;
-    total_pages: number;
-    results: Review[];
-}
-
 
 export default function ReviewManagement() {
     const [reviews, setReviews] = useState<Review[]>([]);
@@ -42,7 +37,7 @@ export default function ReviewManagement() {
     const fetchReviews = async (page: number = 1) => {
         try {
             setLoading(true);
-            const response = await apiRequest(
+            const response = await apiRequest<ReviewsResponse>(
                 "GET", 
                 `/service/review/?page=${page}&page_size=${pageSize}`, 
                 null,
@@ -55,16 +50,53 @@ export default function ReviewManagement() {
 
             console.log("abc", response)
 
-            if (response.results) {
-                setReviews(response.results || []);
-                setTotalPages(response.total_pages);
-                setTotalReviews(response.total);
-                setCurrentPage(response.page);
-            } else if (response.error) {
-                console.error("Error fetching reviews:", response.error);
+            // Safely handle the response
+            if (response && typeof response === 'object') {
+                // Check for results property
+                if ('results' in response && Array.isArray(response.results)) {
+                    setReviews(response.results);
+                } else {
+                    setReviews([]);
+                }
+                
+                // Check for total_pages property
+                if ('total_pages' in response && typeof response.total_pages === 'number') {
+                    setTotalPages(response.total_pages);
+                } else {
+                    setTotalPages(1);
+                }
+                
+                // Check for total property
+                if ('total' in response && typeof response.total === 'number') {
+                    setTotalReviews(response.total);
+                } else {
+                    setTotalReviews(0);
+                }
+                
+                // Check for page property
+                if ('page' in response && typeof response.page === 'number') {
+                    setCurrentPage(response.page);
+                } else {
+                    setCurrentPage(page);
+                }
+                
+                // Check for error
+                if ('error' in response && response.error) {
+                    console.error("Error fetching reviews:", response.error);
+                }
+            } else {
+                // If response is null or not an object
+                setReviews([]);
+                setTotalPages(1);
+                setTotalReviews(0);
+                setCurrentPage(page);
             }
         } catch (error) {
             console.error("Error fetching reviews:", error);
+            setReviews([]);
+            setTotalPages(1);
+            setTotalReviews(0);
+            setCurrentPage(page);
         } finally {
             setLoading(false);
         }
@@ -89,7 +121,8 @@ export default function ReviewManagement() {
                 }
             );
 
-            if (response.data || !response.error) {
+            // Check if response is successful (no error property)
+            if (response && typeof response === 'object' && !('error' in response)) {
                 // Refresh the current page or go to previous page if current page becomes empty
                 if (reviews.length === 1 && currentPage > 1) {
                     toast.success("Review deleted successfully");
@@ -98,7 +131,7 @@ export default function ReviewManagement() {
                     toast.success("Review deleted successfully");
                     fetchReviews(currentPage);
                 }
-            } else if (response.error) {
+            } else if (response && typeof response === 'object' && 'error' in response) {
                 console.error("Failed to delete review:", response.error);
                 toast.error("Failed to delete review: " + response.error);
             }
@@ -136,7 +169,7 @@ export default function ReviewManagement() {
         const maxVisiblePages = 5;
         
         let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+        const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
         
         // Adjust start page if we're near the end
         if (endPage - startPage + 1 < maxVisiblePages) {

@@ -15,30 +15,54 @@ interface User {
     is_active?: boolean;
 }
 
+interface ApiResponseData {
+    total?: number;
+    page?: number;
+    page_size?: number;
+    total_pages?: number;
+    results?: User[];
+    data?: User[];
+    count?: number;
+}
+
 interface ApiResponse {
-    total: number;
-    page: number;
-    page_size: number;
-    total_pages: number;
-    results: User[];
+    data?: ApiResponseData;
+    error?: string | { [key: string]: unknown };
+    success?: boolean;
+    message?: string;
 }
 
-interface BlockResponse {
-    detail: string;
-}
-
-interface DeleteResponse {
-    detail: string;
-}
+// Helper function to safely extract error message
+const getErrorMessage = (error: unknown): string => {
+    if (typeof error === 'string') return error;
+    if (error && typeof error === 'object') {
+        const errorObj = error as Record<string, unknown>;
+        // Try to extract message from common error formats
+        if ('message' in errorObj && typeof errorObj.message === 'string') {
+            return errorObj.message;
+        }
+        if ('detail' in errorObj && typeof errorObj.detail === 'string') {
+            return errorObj.detail;
+        }
+        if ('error' in errorObj && typeof errorObj.error === 'string') {
+            return errorObj.error;
+        }
+        // Stringify the object if it has properties
+        if (Object.keys(errorObj).length > 0) {
+            return JSON.stringify(errorObj);
+        }
+    }
+    return 'An error occurred';
+};
 
 export default function UserManagement() {
-    const [currentPage, setCurrentPage] = useState(1);
-    const [searchTerm, setSearchTerm] = useState('');
+    const [currentPage, setCurrentPage] = useState<number>(1);
+    const [searchTerm, setSearchTerm] = useState<string>('');
     const [users, setUsers] = useState<User[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [totalItems, setTotalItems] = useState(0);
-    const [totalPages, setTotalPages] = useState(0);
-    const [actionLoading, setActionLoading] = useState<number | null>(null); // Track which user action is loading
+    const [loading, setLoading] = useState<boolean>(true);
+    const [totalItems, setTotalItems] = useState<number>(0);
+    const [totalPages, setTotalPages] = useState<number>(0);
+    const [actionLoading, setActionLoading] = useState<number | null>(null);
     const itemsPerPage = 10;
 
     // Fetch users from API with search
@@ -48,23 +72,77 @@ export default function UserManagement() {
             // Build query parameters
             let endpoint = `/accounts/user_all/?page=${page}&page_size=${itemsPerPage}`;
             
-            // Add search parameter if search term exists
             if (search) {
                 endpoint += `&search=${encodeURIComponent(search)}`;
             }
 
-            const data: ApiResponse = await apiRequest("GET", endpoint, null, {
+            const response = await apiRequest<ApiResponse>("GET", endpoint, null, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("authToken")}`
                 }
             });
 
-            setUsers(data.results);
-            setTotalItems(data.total);
-            setTotalPages(data.total_pages);
-            setCurrentPage(data.page);
+            // Safely handle the response
+            if (response && typeof response === 'object') {
+                // Check for error first
+                if ('error' in response && response.error) {
+                    const errorMsg = getErrorMessage(response.error);
+                    console.error('API Error:', errorMsg);
+                    toast.error(errorMsg);
+                    setUsers([]);
+                    setTotalItems(0);
+                    setTotalPages(0);
+                    return;
+                }
+
+                // Extract data from response
+                const responseData = response.data || response;
+                
+                // Now handle the actual data structure
+                if (responseData && typeof responseData === 'object') {
+                    // Extract users array from different possible properties
+                    let usersArray: User[] = [];
+                    const dataObj = responseData as Record<string, unknown>;
+                    
+                    if ('results' in dataObj && Array.isArray(dataObj.results)) {
+                        usersArray = dataObj.results as User[];
+                    } else if ('data' in dataObj && Array.isArray(dataObj.data)) {
+                        usersArray = dataObj.data as User[];
+                    } else if (Array.isArray(responseData)) {
+                        usersArray = responseData as User[];
+                    }
+                    
+                    setUsers(usersArray);
+                    
+                    // Extract total count
+                    const total = (dataObj.total as number) || (dataObj.count as number) || usersArray.length;
+                    setTotalItems(total);
+                    
+                    // Extract total pages
+                    const pages = (dataObj.total_pages as number) || Math.ceil(total / itemsPerPage);
+                    setTotalPages(pages);
+                    
+                    // Extract current page
+                    const current = (dataObj.page as number) || page;
+                    setCurrentPage(current);
+                } else {
+                    console.error('Invalid data format');
+                    toast.error('Invalid data format received');
+                    setUsers([]);
+                    setTotalItems(0);
+                    setTotalPages(0);
+                }
+            } else {
+                console.error('Invalid response format');
+                toast.error('Invalid response from server');
+                setUsers([]);
+                setTotalItems(0);
+                setTotalPages(0);
+            }
         } catch (error) {
-            console.error('Failed to fetch users:', error);
+            const errorMsg = getErrorMessage(error);
+            console.error('Failed to fetch users:', errorMsg);
+            toast.error(`Failed to load users: ${errorMsg}`);
             setUsers([]);
             setTotalItems(0);
             setTotalPages(0);
@@ -77,7 +155,7 @@ export default function UserManagement() {
     const handleBlock = async (userId: number) => {
         try {
             setActionLoading(userId);
-            const response: BlockResponse = await apiRequest("POST", `/accounts/BlockUser/${userId}/`, null, {
+            const response = await apiRequest<ApiResponse>("POST", `/accounts/BlockUser/${userId}/`, null, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("authToken")}`
                 }
@@ -85,19 +163,38 @@ export default function UserManagement() {
             
             console.log('Block response:', response);
             
-            // Update local state to reflect the block status immediately
+            // Safely extract response message
+            let message = 'User blocked successfully';
+            if (response && typeof response === 'object') {
+                const responseObj = response as Record<string, unknown>;
+                
+                if ('error' in responseObj && responseObj.error) {
+                    message = getErrorMessage(responseObj.error);
+                } else if ('data' in responseObj && responseObj.data && typeof responseObj.data === 'object') {
+                    const dataObj = responseObj.data as Record<string, unknown>;
+                    if ('detail' in dataObj && typeof dataObj.detail === 'string') {
+                        message = dataObj.detail;
+                    }
+                } else if ('detail' in responseObj) {
+                    message = typeof responseObj.detail === 'string' ? responseObj.detail : 'User blocked successfully';
+                } else if ('message' in responseObj && responseObj.message) {
+                    message = typeof responseObj.message === 'string' ? responseObj.message : 'User blocked successfully';
+                }
+            }
+            
+            // Update local state
             setUsers(prevUsers => 
                 prevUsers.map(user => 
                     user.id === userId ? { ...user, is_active: false } : user
                 )
             );
             
-            // Show success message
-            toast.success(response.detail || 'User blocked successfully');
+            toast.success(message);
             
-        } catch (error: any) {
-            console.error('Failed to block user:', error);
-            toast.error(error?.error || 'Failed to block user');
+        } catch (error) {
+            const errorMsg = getErrorMessage(error);
+            console.error('Failed to block user:', errorMsg);
+            toast.error(`Failed to block user: ${errorMsg}`);
         } finally {
             setActionLoading(null);
         }
@@ -107,7 +204,7 @@ export default function UserManagement() {
     const handleUnblock = async (userId: number) => {
         try {
             setActionLoading(userId);
-            const response: BlockResponse = await apiRequest("POST", `/accounts/BlockUser/${userId}/unblock/`, null, {
+            const response = await apiRequest<ApiResponse>("POST", `/accounts/BlockUser/${userId}/unblock/`, null, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("authToken")}`
                 }
@@ -115,56 +212,38 @@ export default function UserManagement() {
             
             console.log('Unblock response:', response);
             
-            // Update local state to reflect the unblock status immediately
+            // Safely extract response message
+            let message = 'User unblocked successfully';
+            if (response && typeof response === 'object') {
+                const responseObj = response as Record<string, unknown>;
+                
+                if ('error' in responseObj && responseObj.error) {
+                    message = getErrorMessage(responseObj.error);
+                } else if ('data' in responseObj && responseObj.data && typeof responseObj.data === 'object') {
+                    const dataObj = responseObj.data as Record<string, unknown>;
+                    if ('detail' in dataObj && typeof dataObj.detail === 'string') {
+                        message = dataObj.detail;
+                    }
+                } else if ('detail' in responseObj) {
+                    message = typeof responseObj.detail === 'string' ? responseObj.detail : 'User unblocked successfully';
+                } else if ('message' in responseObj && responseObj.message) {
+                    message = typeof responseObj.message === 'string' ? responseObj.message : 'User unblocked successfully';
+                }
+            }
+            
+            // Update local state
             setUsers(prevUsers => 
                 prevUsers.map(user => 
                     user.id === userId ? { ...user, is_active: true } : user
                 )
             );
             
-            // Show success message
-            toast.success(response.detail || 'User unblocked successfully');
+            toast.success(message);
             
-        } catch (error: any) {
-            console.error('Failed to unblock user:', error);
-            toast.error(error?.error || 'Failed to unblock user');
-        } finally {
-            setActionLoading(null);
-        }
-    };
-
-    // Remove user function
-    const handleRemove = async (userId: number) => {
-        if (!confirm('Are you sure you want to remove this user? This action cannot be undone.')) {
-            return;
-        }
-
-        try {
-            setActionLoading(userId);
-            // Assuming your delete API endpoint - adjust if different
-            const response: DeleteResponse = await apiRequest("DELETE", `/accounts/user_all/${userId}/`, null, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("authToken")}`
-                }
-            });
-            
-            console.log('Remove response:', response);
-            
-            // Remove user from local state immediately
-            setUsers(prevUsers => prevUsers.filter(user => user.id !== userId));
-            setTotalItems(prev => prev - 1);
-            
-            // Show success message
-            toast.success(response.detail || 'User removed successfully');
-            
-            // If current page becomes empty, go to previous page
-            if (users.length === 1 && currentPage > 1) {
-                setCurrentPage(currentPage - 1);
-            }
-            
-        } catch (error: any) {
-            console.error('Failed to remove user:', error);
-            toast.error(error?.error || 'Failed to remove user');
+        } catch (error) {
+            const errorMsg = getErrorMessage(error);
+            console.error('Failed to unblock user:', errorMsg);
+            toast.error(`Failed to unblock user: ${errorMsg}`);
         } finally {
             setActionLoading(null);
         }
@@ -175,15 +254,15 @@ export default function UserManagement() {
         fetchUsers(currentPage, searchTerm);
     }, [currentPage]);
 
-    // Debounced search - fetch new data when search term changes
+    // Debounced search
     useEffect(() => {
         const timeoutId = setTimeout(() => {
             if (currentPage === 1) {
                 fetchUsers(1, searchTerm);
             } else {
-                setCurrentPage(1); // This will trigger the useEffect above
+                setCurrentPage(1);
             }
-        }, 500); // 500ms debounce
+        }, 500);
 
         return () => clearTimeout(timeoutId);
     }, [searchTerm]);
@@ -196,14 +275,13 @@ export default function UserManagement() {
     };
 
     // Generate page numbers for pagination
-    const getPageNumbers = () => {
-        const pageNumbers = [];
+    const getPageNumbers = (): number[] => {
+        const pageNumbers: number[] = [];
         const maxVisiblePages = 5;
 
         let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
         const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
 
-        // Adjust if we're at the end
         if (endPage - startPage + 1 < maxVisiblePages) {
             startPage = Math.max(1, endPage - maxVisiblePages + 1);
         }
@@ -215,8 +293,8 @@ export default function UserManagement() {
         return pageNumbers;
     };
 
-    // Format date to match your design
-    const formatDate = (dateString: string) => {
+    // Format date
+    const formatDate = (dateString: string): string => {
         const date = new Date(dateString);
         return date.toLocaleDateString('en-US', {
             year: 'numeric',
@@ -225,17 +303,17 @@ export default function UserManagement() {
         });
     };
 
-    // Get display name (use Fullname if available, otherwise use email)
-    const getDisplayName = (user: User) => {
+    // Get display name
+    const getDisplayName = (user: User): string => {
         return user.Fullname || user.email.split('@')[0] || 'Unknown User';
     };
 
-    // Calculate display values for current page
+    // Calculate display values
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
 
     return (
-        <div className="min-h-screen  p-6">
+        <div className="min-h-screen p-6">
             <div className='bg-[#0D314B] rounded-lg'>
                 {/* Header */}
                 <div className="flex justify-between items-center p-6">
@@ -271,9 +349,6 @@ export default function UserManagement() {
                                     <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                                         Registration Date
                                     </th>
-                                    {/* <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                                        Subscriptions
-                                    </th> */}
                                     <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                                         Status
                                     </th>
@@ -284,21 +359,18 @@ export default function UserManagement() {
                             </thead>
                             <tbody className="">
                                 {loading ? (
-                                    // Loading state
                                     <tr>
-                                        <td colSpan={7} className="px-6 py-4 text-center text-white">
+                                        <td colSpan={6} className="px-6 py-4 text-center text-white">
                                             Loading users...
                                         </td>
                                     </tr>
                                 ) : users.length === 0 ? (
-                                    // No users state
                                     <tr>
-                                        <td colSpan={7} className="px-6 py-4 text-center text-white">
+                                        <td colSpan={6} className="px-6 py-4 text-center text-white">
                                             {searchTerm ? 'No users found matching your search' : 'No users found'}
                                         </td>
                                     </tr>
                                 ) : (
-                                    // Users data - use the users from API directly
                                     users.map((user, index) => (
                                         <tr key={user.id} className="">
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
@@ -322,13 +394,6 @@ export default function UserManagement() {
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
                                                 {formatDate(user.date_joined)}
                                             </td>
-                                            {/* <td className="px-6 py-4 whitespace-nowrap">
-                                                <span
-                                                    className={`inline-flex px-2 py-1 text-xs font-semibold text-[#F9FAFB]`}
-                                                >
-                                                    Basic Protection
-                                                </span>
-                                            </td> */}
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <span
                                                     className={`inline-flex px-2 py-1 text-xs font-semibold rounded ${
@@ -343,7 +408,6 @@ export default function UserManagement() {
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                 <div className="flex space-x-3">
                                                     {user.is_active === false ? (
-                                                        // Show Unblock button for blocked users
                                                         <button
                                                             onClick={() => handleUnblock(user.id)}
                                                             disabled={actionLoading === user.id}
@@ -362,7 +426,6 @@ export default function UserManagement() {
                                                             )}
                                                         </button>
                                                     ) : (
-                                                        // Show Block button for active users
                                                         <button
                                                             onClick={() => handleBlock(user.id)}
                                                             disabled={actionLoading === user.id}
@@ -381,23 +444,6 @@ export default function UserManagement() {
                                                             )}
                                                         </button>
                                                     )}
-                                                    {/* <button
-                                                        onClick={() => handleRemove(user.id)}
-                                                        disabled={actionLoading === user.id}
-                                                        className="bg-[#551214] px-4 py-1 text-[#FE4D4F] rounded cursor-pointer font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                                                    >
-                                                        {actionLoading === user.id ? (
-                                                            <>
-                                                                <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                                                </svg>
-                                                                Removing...
-                                                            </>
-                                                        ) : (
-                                                            'Remove'
-                                                        )}
-                                                    </button> */}
                                                 </div>
                                             </td>
                                         </tr>
@@ -410,7 +456,6 @@ export default function UserManagement() {
                     {/* Pagination */}
                     <div className="px-6 py-4 border-t border-[#007ED6]">
                         <div className="flex flex-col sm:flex-row items-center justify-between space-y-3 sm:space-y-0">
-                            {/* Showing results text */}
                             <div className="text-sm text-white">
                                 Showing{' '}
                                 <span className="font-medium">

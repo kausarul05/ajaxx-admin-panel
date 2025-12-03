@@ -18,8 +18,8 @@ interface User {
     date_joined: string;
     email: string;
     Fullname: string;
-    groups: any[];
-    user_permissions: any[];
+    groups: unknown[];
+    user_permissions: unknown[];
 }
 
 interface Subscription {
@@ -47,11 +47,13 @@ interface Payment {
     updated_at: string;
 }
 
+// Define API response type
 interface PaymentsResponse {
-    count: number;
-    next: string | null;
-    previous: string | null;
-    results: Payment[];
+    results?: Payment[];
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    error?: string;
 }
 
 export default function Subscribers() {
@@ -67,7 +69,7 @@ export default function Subscribers() {
         const fetchPayments = async () => {
             try {
                 setLoading(true);
-                const response = await apiRequest(
+                const response = await apiRequest<PaymentsResponse>(
                     "GET", 
                     "/payment/payments/",
                     null,
@@ -78,12 +80,17 @@ export default function Subscribers() {
                     }
                 );
 
-                console.log("Fetched payments:", response); // Debug log
-
-                if (response.results) {
-                    setPayments(response.results);
+                // Safely handle the response
+                if (response && typeof response === 'object') {
+                    // Check for results property
+                    if ('results' in response && Array.isArray(response.results)) {
+                        setPayments(response.results);
+                    } else {
+                        console.error("No payments data found in response");
+                        setPayments([]);
+                    }
                 } else {
-                    console.error("No payments data found in response");
+                    console.error("Invalid response format");
                     setPayments([]);
                 }
             } catch (error) {
@@ -99,7 +106,7 @@ export default function Subscribers() {
 
     // Map API data to user structure
     const users = useMemo(() => {
-        return payments.map((payment, index) => {
+        return payments.map((payment) => {
             const user = payment.user;
             const subscription = payment.subscription;
             
@@ -184,16 +191,6 @@ export default function Subscribers() {
         return pageNumbers;
     };
 
-    const handleBlock = (userId: number) => {
-        console.log(`Block user ${userId}`);
-        // Add your block logic here
-    };
-
-    const handleRemove = (userId: number) => {
-        console.log(`Remove user ${userId}`);
-        // Add your remove logic here
-    };
-
     if (loading) {
         return (
             <div className="min-h-screen p-6">
@@ -219,7 +216,7 @@ export default function Subscribers() {
     }
 
     return (
-        <div className="min-h-screen  p-6">
+        <div className="min-h-screen p-6">
             <div className='bg-[#0D314B] rounded-lg'>
                 {/* Header */}
                 <div className="flex justify-between items-center p-6">
@@ -258,9 +255,6 @@ export default function Subscribers() {
                                     <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                                         Subscriptions
                                     </th>
-                                    {/* <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                                        Action
-                                    </th> */}
                                 </tr>
                             </thead>
                             <tbody className="">
@@ -301,22 +295,6 @@ export default function Subscribers() {
                                                     {user.subscription}
                                                 </span>
                                             </td>
-                                            {/* <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                <div className="flex space-x-3">
-                                                    <button
-                                                        onClick={() => handleBlock(user.id)}
-                                                        className="bg-[#0ABF9D4D] px-4 py-1 text-[#0ABF9D] rounded cursor-pointer font-medium transition-colors"
-                                                    >
-                                                        Block
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleRemove(user.id)}
-                                                        className="bg-[#551214] px-4 py-1 text-[#FE4D4F] rounded cursor-pointer font-medium transition-colors"
-                                                    >
-                                                        Remove
-                                                    </button>
-                                                </div>
-                                            </td> */}
                                         </tr>
                                     ))
                                 )}

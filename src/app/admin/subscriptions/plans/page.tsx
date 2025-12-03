@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { CircleCheck, CircleX, Pencil, Plus, Trash, X } from "lucide-react";
+import { CircleCheck, Pencil, Plus, Trash, X } from "lucide-react";
 import { apiRequest } from '@/app/lib/api';
 import { toast } from "react-toastify";
 
@@ -19,10 +19,13 @@ interface Subscription {
     features: Feature[];
 }
 
-interface ApiResponse {
-    success: boolean;
-    message: string;
-    data: Subscription[];
+// Remove the old ApiResponse interface and create a new one that matches the actual response
+interface SubscriptionsResponse {
+    results?: Subscription[];
+    data?: Subscription[];
+    success?: boolean;
+    message?: string;
+    error?: string;
 }
 
 interface CreateSubscriptionData {
@@ -55,20 +58,40 @@ export default function PlansManagement() {
     const fetchSubscriptions = async () => {
         try {
             setLoading(true);
-            const response: ApiResponse = await apiRequest("GET", "/payment/subscriptions", null, {
+            const response = await apiRequest<SubscriptionsResponse>("GET", "/payment/subscriptions", null, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("authToken")}`
                 }
             });
 
-            if (response.success) {
-                setSubscriptions(response.data);
+            // Safely handle the response
+            if (response && typeof response === 'object') {
+                // Check different possible response structures
+                if ('data' in response && Array.isArray(response.data)) {
+                    setSubscriptions(response.data);
+                } else if ('results' in response && Array.isArray(response.results)) {
+                    setSubscriptions(response.results);
+                } else if (Array.isArray(response)) {
+                    setSubscriptions(response);
+                } else if ('error' in response && response.error) {
+                    console.error('Failed to fetch subscriptions:', response.error);
+                    toast.error("Failed to fetch subscriptions");
+                    setSubscriptions([]);
+                } else if ('message' in response && response.message) {
+                    console.error('Failed to fetch subscriptions:', response.message);
+                    toast.error(response.message);
+                    setSubscriptions([]);
+                } else {
+                    console.error('Unexpected response structure:', response);
+                    setSubscriptions([]);
+                }
             } else {
-                console.error('Failed to fetch subscriptions:', response.message);
+                console.error('Invalid response:', response);
                 setSubscriptions([]);
             }
         } catch (error) {
             console.error('Failed to fetch subscriptions:', error);
+            toast.error('Failed to fetch subscriptions');
             setSubscriptions([]);
         } finally {
             setLoading(false);
@@ -100,18 +123,25 @@ export default function PlansManagement() {
         }
 
         try {
-            await apiRequest("DELETE", `/payment/subscriptions/${subscriptionId}/`, null, {
+            const response = await apiRequest("DELETE", `/payment/subscriptions/${subscriptionId}/`, null, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("authToken")}`
                 }
             });
-            
-            setSubscriptions(prev => prev.filter(sub => sub.id !== subscriptionId));
-            toast.success('Subscription deleted successfully');
-            
-        } catch (error: any) {
+
+            if (response && typeof response === 'object' && !('error' in response)) {
+                setSubscriptions(prev => prev.filter(sub => sub.id !== subscriptionId));
+                toast.success('Subscription deleted successfully');
+            } else if (response && typeof response === 'object' && 'error' in response) {
+                console.error('Failed to delete subscription:', response.error);
+                toast.error('Failed to delete subscription: ' + response.error);
+            } else if (response && typeof response === 'object' && 'message' in response) {
+                console.error('Failed to delete subscription:', response.message);
+                toast.error('Failed to delete subscription: ' + response.message);
+            }
+        } catch (error) {
             console.error('Failed to delete subscription:', error);
-            toast.error(error?.error || 'Failed to delete subscription');
+            toast.error('Failed to delete subscription');
         }
     };
 
@@ -182,17 +212,29 @@ export default function PlansManagement() {
                 }
             });
 
-            if (response.success) {
-                toast.success('Subscription created successfully');
-                setShowCreateModal(false);
-                resetForm();
-                fetchSubscriptions(); // Refresh the list
+            if (response && typeof response === 'object') {
+                if ('success' in response && response.success === true) {
+                    toast.success(response.message || 'Subscription created successfully');
+                    setShowCreateModal(false);
+                    resetForm();
+                    fetchSubscriptions(); // Refresh the list
+                } else if ('error' in response) {
+                    toast.error('Failed to create subscription');
+                } else if ('message' in response) {
+                    toast.error(response.message || 'Failed to create subscription');
+                } else {
+                    // If no success flag but response exists, assume it worked
+                    toast.success('Subscription created successfully');
+                    setShowCreateModal(false);
+                    resetForm();
+                    fetchSubscriptions();
+                }
             } else {
-                toast.error(response.message || 'Failed to create subscription');
+                toast.error('Failed to create subscription: Invalid response');
             }
-        } catch (error: any) {
+        } catch (error) {
             console.error('Failed to create subscription:', error);
-            toast.error(error?.error || 'Failed to create subscription');
+            toast.error('Failed to create subscription');
         } finally {
             setCreateLoading(false);
         }
@@ -225,16 +267,27 @@ export default function PlansManagement() {
                 }
             });
 
-            if (response.success) {
-                toast.success('Subscription updated successfully');
-                setShowEditModal(false);
-                fetchSubscriptions(); // Refresh the list
+            if (response && typeof response === 'object') {
+                if ('success' in response && response.success === true) {
+                    toast.success(response.message || 'Subscription updated successfully');
+                    setShowEditModal(false);
+                    fetchSubscriptions(); // Refresh the list
+                } else if ('error' in response) {
+                    toast.error('Failed to update subscription');
+                } else if ('message' in response) {
+                    toast.error(response.message || 'Failed to update subscription');
+                } else {
+                    // If no success flag but response exists, assume it worked
+                    toast.success('Subscription updated successfully');
+                    setShowEditModal(false);
+                    fetchSubscriptions();
+                }
             } else {
-                toast.error(response.message || 'Failed to update subscription');
+                toast.error('Failed to update subscription: Invalid response');
             }
-        } catch (error: any) {
+        } catch (error) {
             console.error('Failed to update subscription:', error);
-            toast.error(error?.error || 'Failed to update subscription');
+            toast.error('Failed to update subscription');
         } finally {
             setEditLoading(false);
         }

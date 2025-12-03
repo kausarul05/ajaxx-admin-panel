@@ -6,8 +6,26 @@ import profile from "@/../public/images/profile.jpg"
 import { apiRequest } from "@/app/lib/api";
 import { toast } from "react-toastify";
 
+// Define Profile data interface
+interface ProfileData {
+    fullname?: string;
+    email?: string;
+    Country?: string;
+    City?: string;
+    Province?: string;
+    Gender?: string;
+    Bio?: string;
+    profile_picture?: string;
+}
+
+// Define API response type
+interface ProfileResponse {
+    error?: string;
+    [key: string]: unknown; // Allow other properties
+}
+
 export default function Page() {
-    const [activeTab, setActiveTab] = useState("profile"); // "profile" or "password"
+    const [activeTab, setActiveTab] = useState("profile"); 
     const fileInputRef = useRef<HTMLInputElement | null>(null);
     const [preview, setPreview] = useState<string>(profile.src);
     const [saving, setSaving] = useState(false);
@@ -43,7 +61,7 @@ export default function Page() {
     const fetchProfileData = async () => {
         try {
             setLoading(true);
-            const response = await apiRequest(
+            const response = await apiRequest<ProfileResponse>(
                 "GET", 
                 "/accounts/profile/", 
                 null,
@@ -56,26 +74,37 @@ export default function Page() {
 
             console.log("response from profile fetch:", response); // Debug log 
 
-            if (response) {
-                const profileData = response;
+            if (response && typeof response === 'object') {
+                // Safely extract profile data
+                const profileData = response as ProfileData;
                 console.log("Profile data received:", profileData); // Debug log
                 
+                // Helper function to safely extract string value
+                const getStringValue = (value: unknown): string => {
+                    if (typeof value === 'string') return value;
+                    if (typeof value === 'number') return value.toString();
+                    return "";
+                };
+
                 setFormData({
-                    fullname: profileData.fullname || "",
-                    email: profileData.email || "", // Add email if available from API
-                    Country: profileData.Country || "",
-                    City: profileData.City || "",
-                    Province: profileData.Province || "",
-                    Gender: profileData.Gender || "",
-                    Bio: profileData.Bio || ""
+                    fullname: getStringValue(profileData.fullname),
+                    email: getStringValue(profileData.email),
+                    Country: getStringValue(profileData.Country),
+                    City: getStringValue(profileData.City),
+                    Province: getStringValue(profileData.Province),
+                    Gender: getStringValue(profileData.Gender),
+                    Bio: getStringValue(profileData.Bio)
                 });
 
                 // Set profile picture if available
-                if (profileData.profile_picture) {
+                if (typeof profileData.profile_picture === 'string') {
                     setPreview(profileData.profile_picture);
                 }
-            } else if (response.error) {
-                console.error("Error fetching profile:", response.error);
+            } else if (response && typeof response === 'object' && 'error' in response) {
+                // console.error("Error fetching profile:", response.error);
+                toast.error("Error loading profile data");
+            } else {
+                console.error("Invalid response format");
                 toast.error("Error loading profile data");
             }
         } catch (error) {
@@ -114,7 +143,7 @@ export default function Page() {
         }));
     };
 
-    // Handle password input changes - FIXED VERSION
+    // Handle password input changes
     const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setPasswordData(prev => ({
@@ -147,9 +176,9 @@ export default function Page() {
                 }
             );
 
-            if (response) {
+            if (response && typeof response === 'object' && !('error' in response)) {
                 toast.success("Profile updated successfully!");
-            } else if (response.error) {
+            } else if (response && typeof response === 'object' && 'error' in response) {
                 console.error("Failed to update profile:", response.error);
                 toast.error("Failed to update profile: " + response.error);
             }
@@ -188,17 +217,15 @@ export default function Page() {
                 }
             );
 
-            // console.log("response from password change:", response); // Debug log
-
             toast.success("Password changed successfully!");
             
-            if (response) {
+            if (response && typeof response === 'object' && !('error' in response)) {
                 setPasswordData({
                     current_password: "",
                     new_password: "",
                     confirm_password: ""
                 });
-            } else if (response.error) {
+            } else if (response && typeof response === 'object' && 'error' in response) {
                 console.error("Failed to change password:", response.error);
                 toast.error("Failed to change password: " + response.error);
             }
@@ -215,7 +242,6 @@ export default function Page() {
             <div className="min-h-screen bg-[#0A2131] text-white p-6">
                 <div className="flex gap-6">
                     <div className="mb-8 w-[400px] bg-[#0D314B] h-full p-4 rounded-lg">
-                        {/* Loading skeleton for sidebar */}
                         <div className="animate-pulse">
                             <div className="h-10 bg-gray-700 rounded mb-2"></div>
                             <div className="h-10 bg-gray-700 rounded"></div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { CircleCheck, CircleX, Pencil, Plus, Trash } from "lucide-react";
+import { CircleCheck, Pencil, Plus, Trash } from "lucide-react";
 import { apiRequest } from "@/app/lib/api";
 
 interface Product {
@@ -14,6 +14,20 @@ interface Product {
   add_link: string;
   created_at: string;
   dynamic_discount_percentage: number;
+}
+
+// Define API response types
+interface ProductsResponse {
+  results?: Product[];
+  error?: string;
+  data?: Product[];
+}
+
+interface ApiResponse<T> {
+  data?: T;
+  error?: string;
+  success?: boolean;
+  message?: string;
 }
 
 export default function ProductsManagement() {
@@ -38,7 +52,7 @@ export default function ProductsManagement() {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await apiRequest(
+      const response = await apiRequest<ProductsResponse>(
         "GET", 
         "/product/api/Product-all/", 
         null,
@@ -49,10 +63,24 @@ export default function ProductsManagement() {
         }
       );
 
-      if (response.results) {
-        setProducts(response.results || []);
-      } else if (response.error) {
-        console.error("Error fetching products:", response.error);
+      // Safely handle the response
+      if (response && typeof response === 'object') {
+        // Check for results property
+        if ('results' in response && Array.isArray(response.results)) {
+          setProducts(response.results);
+        } 
+        // Check for data property (alternative structure)
+        else if ('data' in response && Array.isArray(response.data)) {
+          setProducts(response.data);
+        }
+        // Check if response itself is an array
+        else if (Array.isArray(response)) {
+          setProducts(response);
+        }
+        // Handle error
+        else if ('error' in response && response.error) {
+          console.error("Error fetching products:", response.error);
+        }
       }
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -82,12 +110,12 @@ export default function ProductsManagement() {
         }
       );
 
-      if (response) {
+      if (response && typeof response === 'object' && !('error' in response)) {
         // Close modal and refresh data
         setShowCreateModal(false);
         resetForm();
         await fetchProducts(); // Wait for refresh
-      } else if (response.error) {
+      } else if (response && typeof response === 'object' && 'error' in response) {
         console.error("Failed to create product:", response.error);
         alert("Failed to create product: " + response.error);
       }
@@ -116,14 +144,12 @@ export default function ProductsManagement() {
         }
       );
 
-    //   console.log("Update response:", response);
-
-      if (response) {
+      if (response && typeof response === 'object' && !('error' in response)) {
         // Close modal and refresh data
         setShowEditModal(false);
         resetForm();
         await fetchProducts(); // Wait for refresh
-      } else if (response.error) {
+      } else if (response && typeof response === 'object' && 'error' in response) {
         console.error("Failed to update product:", response.error);
         alert("Failed to update product: " + response.error);
       }
@@ -151,9 +177,9 @@ export default function ProductsManagement() {
         }
       );
 
-      if (response.data || !response.error) {
+      if (response && typeof response === 'object' && !('error' in response)) {
         await fetchProducts(); // Wait for refresh
-      } else if (response.error) {
+      } else if (response && typeof response === 'object' && 'error' in response) {
         console.error("Failed to delete product:", response.error);
         alert("Failed to delete product: " + response.error);
       }

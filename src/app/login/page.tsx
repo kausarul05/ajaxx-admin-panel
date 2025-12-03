@@ -3,13 +3,20 @@
 import { useState } from "react";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { apiRequest } from "@/app/lib/api"; // Update the import path
+import { apiRequest } from "@/app/lib/api";
 
 type LoginFormData = {
   email: string;
   password: string;
   rememberMe: boolean;
 };
+
+interface LoginResponse {
+  access?: string;
+  user?: Record<string, unknown>; // User object with unknown structure
+  message?: string;
+  error?: string;
+}
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -52,19 +59,46 @@ export default function LoginPage() {
         password: formData.password,
       };
 
-      const data = await apiRequest("POST", "/accounts/login/", payload);
+      const response = await apiRequest<LoginResponse>("POST", "/accounts/login/", payload);
 
-      if (data.access || data.user) {
-        if (data.access) localStorage.setItem("authToken", data.access);
-        if (data.user) localStorage.setItem("userData", JSON.stringify(data.user));
-        if (formData.rememberMe) localStorage.setItem("rememberMe", "true");
+      // Check if response is valid
+      if (response && typeof response === 'object') {
+        // Safely check for access token
+        const accessToken = 'access' in response && typeof response.access === 'string' 
+          ? response.access 
+          : null;
+        
+        const userData = 'user' in response && response.user && typeof response.user === 'object'
+          ? response.user
+          : null;
 
-        router.push("/admin");
+        if (accessToken || userData) {
+          if (accessToken) {
+            localStorage.setItem("authToken", accessToken);
+          }
+          if (userData) {
+            localStorage.setItem("userData", JSON.stringify(userData));
+          }
+          if (formData.rememberMe) {
+            localStorage.setItem("rememberMe", "true");
+          }
+
+          router.push("/admin");
+        } else {
+          // Check for error message
+          const errorMessage = 'message' in response && typeof response.message === 'string'
+            ? response.message
+            : 'error' in response && typeof response.error === 'string'
+            ? response.error
+            : 'Login failed. Please check your credentials.';
+          
+          setError(errorMessage);
+        }
       } else {
-        setError(data.message || "Login failed. Please check your credentials.");
+        setError("Invalid response from server");
       }
-    } catch (err: any) {
-      setError(err?.error || "Something went wrong. Please try again.");
+    } catch (err) {
+      setError("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
     }
