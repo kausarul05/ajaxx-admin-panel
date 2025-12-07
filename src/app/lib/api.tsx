@@ -3,7 +3,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, Method, InternalAxiosRequestConfig } from 'axios';
 
 // Base API URL
-const BASE_API = "http://10.10.10.46:8000";
+const BASE_API = "http://backend.ajaxxdatascrubber.com";
 
 // Define generic API response type
 export interface ApiResponse<T = unknown> {
