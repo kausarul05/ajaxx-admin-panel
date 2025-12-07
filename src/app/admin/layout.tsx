@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Image from "next/image";
 import profile from "@/../public/images/profile.jpg"
 import { ChevronsLeft } from "lucide-react";
-import AdminAuthWrapper from "./Components/AdminAuthWrapper/AdminAuthWrapper";
+// import AdminAuthWrapper from "./Components/AdminAuthWrapper/AdminAuthWrapper";
 import Sidebar from "./Components/Sidebar/Sidebar";
 import Link from "next/link";
 
@@ -19,7 +19,7 @@ export default function AdminLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <AdminAuthWrapper>
+        // <AdminAuthWrapper>
             <div className="flex">
                 <div>
                     <Sidebar />
@@ -42,6 +42,6 @@ export default function AdminLayout({
                     {children}
                 </div>
             </div>
-        </AdminAuthWrapper>
+        // </AdminAuthWrapper>
     );
 }

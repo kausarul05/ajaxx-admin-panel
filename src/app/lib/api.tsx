@@ -3,7 +3,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, Method, InternalAxiosRequestConfig } from 'axios';
 
 // Base API URL
-const BASE_API = "http://backend.ajaxxdatascrubber.com";
+const BASE_API = "http://10.10.10.46:8000";
 
 // Define generic API response type
 export interface ApiResponse<T = unknown> {
@@ -24,9 +24,9 @@ export interface ApiError {
 // Axios instance with proper typing
 const api: AxiosInstance = axios.create({
   baseURL: BASE_API,
-  headers: {
-    "Content-Type": "application/json",
-  },
+  // headers: {
+  //   "Content-Type": "application/json",
+  // },
   withCredentials: true,
 });
 

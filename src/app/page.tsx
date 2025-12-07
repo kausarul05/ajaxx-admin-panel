@@ -18,6 +18,16 @@ interface LoginResponse {
   error?: string;
 }
 
+interface ApiError {
+  data?: {
+    error?: string;
+    message?: string;
+  };
+  message?: string;
+  error?: string;
+}
+
+
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState<LoginFormData>({
@@ -61,13 +71,15 @@ export default function LoginPage() {
 
       const response = await apiRequest<LoginResponse>("POST", "/accounts/login/", payload);
 
+
+
       // Check if response is valid
       if (response && typeof response === 'object') {
         // Safely check for access token
-        const accessToken = 'access' in response && typeof response.access === 'string' 
-          ? response.access 
+        const accessToken = 'access' in response && typeof response.access === 'string'
+          ? response.access
           : null;
-        
+
         const userData = 'user' in response && response.user && typeof response.user === 'object'
           ? response.user
           : null;
@@ -90,16 +102,34 @@ export default function LoginPage() {
           const errorMessage = 'message' in response && typeof response.message === 'string'
             ? response.message
             : 'error' in response && typeof response.error === 'string'
-            ? response.error
-            : 'Login failed. Please check your credentials.';
-          
+              ? response.error
+              : 'Login failed. Please check your credentials.';
+
           setError(errorMessage);
         }
       } else {
         setError("Invalid response from server");
       }
-    } catch (err) {
-      setError("Something went wrong. Please try again.");
+    } catch (err: unknown) {
+      console.log("Login error:", err);
+
+      // Type guard function
+      const isApiError = (error: unknown): error is ApiError => {
+        return typeof error === 'object' && error !== null;
+      };
+
+      if (isApiError(err)) {
+        const errorMessage = err.data?.error ||
+          err.data?.message ||
+          err.message ||
+          err.error ||
+          "Login failed. Please try again.";
+        setError(errorMessage);
+      } else if (typeof err === 'string') {
+        setError(err);
+      } else {
+        setError("Login failed. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }
