@@ -7,7 +7,11 @@ import {
     User,
     Lock,
     ChevronDown,
-    ChevronRight
+    ChevronRight,
+    Users,           // For User Management
+    Package,         // For Products Management
+    MessageSquare,   // For Review Management
+    HelpCircle       // For FAQ Management
 } from "lucide-react";
 import React, { useState, useEffect } from 'react'
 import logo from "@/../public/images/logo.png"
@@ -22,7 +26,7 @@ export default function Sidebar() {
 
     const menuItems = [
         { href: "/admin", icon: LayoutDashboard, label: "Dashboards" },
-        { href: "/admin/user-management", icon: History, label: "User Management" },
+        { href: "/admin/user-management", icon: Users, label: "User Management" }, // Updated
         {
             href: "#",
             icon: Star,
@@ -33,11 +37,13 @@ export default function Sidebar() {
                 { href: "/admin/subscriptions/subscribers", label: "Subscribers" }
             ]
         },
-        { href: "/admin/products-management", icon: User, label: "Products Management" },
-        { href: "/admin/review-management", icon: User, label: "Review Management" },
+        { href: "/admin/products-management", icon: Package, label: "Products Management" }, // Updated
+        { href: "/admin/review-management", icon: MessageSquare, label: "Review Management" }, // Updated
+        { href: "/admin/faq-management", icon: HelpCircle, label: "FAQ Management" }, // Updated
         { href: "/admin/settings", icon: Lock, label: "Settings" },
     ];
 
+    // ... rest of your component code remains exactly the same ...
     // Auto-open menu if current page is a nested item
     useEffect(() => {
         const subscriptionsItem = menuItems.find(item => item.hasNested);
